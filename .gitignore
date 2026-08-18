@@ -1,0 +1,26 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+.settings/
+.classpath
+.project
+
+# Maven
+target/
+*.class
+*.jar
+*.war
+
+# Log
+*.log
+logs/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temp
+.claude/
+*.png
+*.tmp
