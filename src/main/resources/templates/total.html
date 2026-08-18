@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>总报表 - 招聘报表管理系统</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}">
+</head>
+<body>
+
+<nav class="navbar">
+    <a class="navbar-brand" th:href="@{/}"><span>📋</span> 招聘报表管理系统</a>
+    <ul class="navbar-nav">
+        <li><a th:href="@{/}">首页</a></li>
+        <li><a th:href="@{/page/position}">职位管理</a></li>
+        <li><a th:href="@{/page/weekly}">每周招聘</a></li>
+        <li><a th:href="@{/page/total}" class="active">总报表</a></li>
+    </ul>
+</nav>
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h5>招募总报表</h5>
+            <div>
+                <button class="btn btn-outline btn-sm" onclick="resetFilter()">重置</button>
+                <button class="btn btn-primary btn-sm" onclick="loadData()">刷新数据</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- 筛选栏 -->
+            <div class="filter-bar">
+                <div class="filter-item">
+                    <label>职位:</label>
+                    <input type="text" class="form-control" id="filterPosition" placeholder="职位名称" style="width: 150px;">
+                </div>
+                <div class="filter-item">
+                    <label>渠道:</label>
+                    <select class="form-select" id="filterChannel" style="width: 100px;">
+                        <option value="">全部</option>
+                        <option value="校招">校招</option>
+                        <option value="社招">社招</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="loadData()">查询</button>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="stats-row" id="statsRow"></div>
+
+            <!-- 数据表格 -->
+            <div class="table-wrapper">
+                <table class="data-table" id="totalTable">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">序号</th>
+                            <th rowspan="2">需求<br>职位</th>
+                            <th rowspan="2">需求<br>人数</th>
+                            <th rowspan="2">剩余<br>人数</th>
+                            <th rowspan="2">渠道</th>
+                            <th rowspan="2">子<br>渠道</th>
+                            <th rowspan="2">简历<br>收取</th>
+                            <th rowspan="2">笔试<br>安排</th>
+                            <th rowspan="2">笔试<br>完成</th>
+                            <th rowspan="2">笔试<br>累计</th>
+                            <th colspan="2">笔试比率</th>
+                            <th rowspan="2">初试</th>
+                            <th rowspan="2">复试</th>
+                            <th rowspan="2">录用</th>
+                            <th rowspan="2">录用<br>累计</th>
+                            <th rowspan="2">面试<br>通过率</th>
+                            <th rowspan="2">签订<br>三方</th>
+                            <th rowspan="2">签约率</th>
+                            <th rowspan="2">拒签/<br>取消</th>
+                            <th rowspan="2">拒签率</th>
+                            <th rowspan="2">违约</th>
+                            <th rowspan="2">违约率</th>
+                            <th rowspan="2">待签<br>三方</th>
+                            <th rowspan="2">考虑中</th>
+                            <th rowspan="2">待沟通</th>
+                            <th rowspan="2">累计<br>报到</th>
+                            <th rowspan="2">备注</th>
+                        </tr>
+                        <tr>
+                            <th>参加率</th>
+                            <th>通过率</th>
+                        </tr>
+                    </thead>
+                    <tbody id="totalTbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/static/js/total.js}"></script>
+</body>
+</html>

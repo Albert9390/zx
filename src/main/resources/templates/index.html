@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>招聘报表管理系统</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}">
+</head>
+<body>
+
+<!-- 导航栏 -->
+<nav class="navbar">
+    <a class="navbar-brand" th:href="@{/}">
+        <span>📋</span> 招聘报表管理系统
+    </a>
+    <ul class="navbar-nav">
+        <li><a th:href="@{/}" class="active">首页</a></li>
+        <li><a th:href="@{/page/position}">职位管理</a></li>
+        <li><a th:href="@{/page/weekly}">每周招聘</a></li>
+        <li><a th:href="@{/page/total}">总报表</a></li>
+    </ul>
+</nav>
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-body" style="text-align: center; padding: 40px;">
+            <h2 style="font-size: 24px; margin-bottom: 12px;">欢迎使用招聘报表管理系统</h2>
+            <p style="color: var(--text-secondary); font-size: 15px;">
+                管理每周招聘数据，自动汇总生成总报表
+            </p>
+        </div>
+    </div>
+
+    <div class="home-grid">
+        <a th:href="@{/page/position}" class="home-card green">
+            <div class="icon">📌</div>
+            <h4>职位管理</h4>
+            <p>管理需求职位和招募人数，支持增删改查</p>
+        </a>
+        <a th:href="@{/page/weekly}" class="home-card">
+            <div class="icon">📝</div>
+            <h4>每周招聘</h4>
+            <p>录入每周招聘数据（简历收取、笔试、面试、录用等），总表数据自动汇总</p>
+        </a>
+        <a th:href="@{/page/total}" class="home-card orange">
+            <div class="icon">📊</div>
+            <h4>总报表</h4>
+            <p>查看汇总报表，按需求职位+渠道自动计算各项数据和比率</p>
+        </a>
+    </div>
+
+    <div class="card" style="margin-top: 20px;">
+        <div class="card-header">
+            <h5>数据说明</h5>
+        </div>
+        <div class="card-body">
+            <ul style="line-height: 2; color: var(--text-secondary); padding-left: 20px;">
+                <li><strong>每周招聘</strong>：录入每周各职位的招聘进展数据</li>
+                <li><strong>总报表</strong>：系统自动将每周招聘数据按 <strong>需求职位 + 渠道</strong> 汇总求和</li>
+                <li><strong>示例</strong>：每周招聘中 FW 职位(秋招)笔试完成 10 人 → 总表 FW 职位(秋招)笔试完成自动 +10</li>
+                <li><strong>比率计算</strong>：笔试参加率、笔试通过率、面试通过率、签约率、拒签率、违约率均自动计算</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

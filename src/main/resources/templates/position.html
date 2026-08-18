@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>职位管理 - 招聘报表管理系统</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}">
+</head>
+<body>
+
+<nav class="navbar">
+    <a class="navbar-brand" th:href="@{/}"><span>📋</span> 招聘报表管理系统</a>
+    <ul class="navbar-nav">
+        <li><a th:href="@{/}">首页</a></li>
+        <li><a th:href="@{/page/position}" class="active">职位管理</a></li>
+        <li><a th:href="@{/page/weekly}">每周招聘</a></li>
+        <li><a th:href="@{/page/total}">总报表</a></li>
+    </ul>
+</nav>
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h5>职位管理</h5>
+            <button class="btn btn-primary btn-sm" onclick="openModal()">+ 新增职位</button>
+        </div>
+        <div class="card-body">
+            <div class="table-wrapper">
+                <table class="data-table" id="positionTable">
+                    <thead>
+                        <tr>
+                            <th>序号</th>
+                            <th>需求职位</th>
+                            <th>需求人数(周期)</th>
+                            <th>排序</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="positionTbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新增/编辑模态框 -->
+<div class="modal-overlay" id="positionModal">
+    <div class="modal-dialog">
+        <div class="modal-header">
+            <h5 id="modalTitle">新增职位</h5>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editId">
+            <div class="form-group">
+                <label class="form-label">需求职位名称 *</label>
+                <input type="text" class="form-control" id="positionName" placeholder="如: FW, AE, IC">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">需求人数(周期)</label>
+                    <input type="number" class="form-control" id="demandCount" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">排序序号</label>
+                    <input type="number" class="form-control" id="sortOrder" value="0" min="0">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" onclick="savePosition()">保存</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/static/js/position.js}"></script>
+</body>
+</html>

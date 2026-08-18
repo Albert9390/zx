@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.quectel.recruitment.mapper.WeeklyRecruitmentMapper">
+
+    <!--
+        汇总查询：按 需求职位 + 渠道 + 子渠道 分组求和
+        总表数据 = 每周招聘数据的 SUM
+    -->
+    <select id="selectTotalReport" resultType="com.quectel.recruitment.entity.vo.TotalRecruitmentVO">
+        SELECT
+            p.sort_order           AS sortOrder,
+            p.position_name         AS positionName,
+            p.demand_count          AS demandCount,
+            (p.demand_count - COALESCE(t.total_onboarded, 0)) AS remainingCount,
+            t.channel               AS channel,
+            t.sub_channel           AS subChannel,
+            COALESCE(t.resume_received, 0)          AS resumeReceived,
+            COALESCE(t.written_exam_scheduled, 0)    AS writtenExamScheduled,
+            COALESCE(t.written_exam_completed, 0)    AS writtenExamCompleted,
+            COALESCE(t.written_exam_accumulated, 0)  AS writtenExamAccumulated,
+            COALESCE(t.first_interview, 0)           AS firstInterview,
+            COALESCE(t.second_interview, 0)          AS secondInterview,
+            COALESCE(t.hired, 0)                     AS hired,
+            COALESCE(t.hired_accumulated, 0)         AS hiredAccumulated,
+            COALESCE(t.offer_signed, 0)              AS offerSigned,
+            COALESCE(t.offer_rejected, 0)            AS offerRejected,
+            COALESCE(t.contract_broken, 0)           AS contractBroken,
+            COALESCE(t.pending_contract, 0)          AS pendingContract,
+            COALESCE(t.considering, 0)               AS considering,
+            COALESCE(t.pending_communication, 0)     AS pendingCommunication,
+            COALESCE(t.total_onboarded, 0)           AS totalOnboarded
+        FROM (
+            SELECT
+                position_name,
+                channel,
+                sub_channel,
+                SUM(resume_received)          AS resume_received,
+                SUM(written_exam_scheduled)    AS written_exam_scheduled,
+                SUM(written_exam_completed)    AS written_exam_completed,
+                MAX(written_exam_accumulated)  AS written_exam_accumulated,
+                SUM(first_interview)           AS first_interview,
+                SUM(second_interview)          AS second_interview,
+                SUM(hired)                     AS hired,
+                MAX(hired)                     AS hired_accumulated,
+                SUM(offer_signed)              AS offer_signed,
+                SUM(offer_rejected)            AS offer_rejected,
+                SUM(contract_broken)           AS contract_broken,
+                SUM(pending_contract)          AS pending_contract,
+                SUM(considering)               AS considering,
+                SUM(pending_communication)     AS pending_communication,
+                SUM(weekly_onboarded)          AS total_onboarded
+            FROM weekly_recruitment
+            GROUP BY position_name, channel, sub_channel
+        ) t
+        RIGHT JOIN recruitment_position p ON p.position_name = t.position_name
+        ORDER BY p.sort_order, t.channel, t.sub_channel
+    </select>
+
+    <!-- 条件查询每周数据 -->
+    <select id="selectWeeklyList" resultType="com.quectel.recruitment.entity.WeeklyRecruitment">
+        SELECT * FROM weekly_recruitment
+        <where>
+            <if test="positionName != null and positionName != ''">
+                AND position_name LIKE CONCAT('%', #{positionName}, '%')
+            </if>
+            <if test="channel != null and channel != ''">
+                AND channel = #{channel}
+            </if>
+            <if test="subChannel != null and subChannel != ''">
+                AND sub_channel = #{subChannel}
+            </if>
+            <if test="startDate != null and startDate != ''">
+                AND start_date &gt;= #{startDate}
+            </if>
+            <if test="endDate != null and endDate != ''">
+                AND end_date &lt;= #{endDate}
+            </if>
+        </where>
+        ORDER BY start_date DESC, id DESC
+    </select>
+
+</mapper>

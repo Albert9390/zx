@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每周招聘 - 招聘报表管理系统</title>
+    <link rel="stylesheet" th:href="@{/static/css/style.css}">
+</head>
+<body>
+
+<nav class="navbar">
+    <a class="navbar-brand" th:href="@{/}"><span>📋</span> 招聘报表管理系统</a>
+    <ul class="navbar-nav">
+        <li><a th:href="@{/}">首页</a></li>
+        <li><a th:href="@{/page/position}">职位管理</a></li>
+        <li><a th:href="@{/page/weekly}" class="active">每周招聘</a></li>
+        <li><a th:href="@{/page/total}">总报表</a></li>
+    </ul>
+</nav>
+
+<div class="container-fluid">
+    <div class="card">
+        <div class="card-header">
+            <h5>每周招聘数据</h5>
+            <div>
+                <button class="btn btn-outline btn-sm" onclick="resetFilter()">重置</button>
+                <button class="btn btn-primary btn-sm" onclick="openAddModal()">+ 新增每周数据</button>
+            </div>
+        </div>
+        <div class="card-body">
+            <!-- 筛选栏 -->
+            <div class="filter-bar">
+                <div class="filter-item">
+                    <label>开始日期:</label>
+                    <input type="date" class="form-control" id="filterStartDate">
+                </div>
+                <div class="filter-item">
+                    <label>结束日期:</label>
+                    <input type="date" class="form-control" id="filterEndDate">
+                </div>
+                <div class="filter-item">
+                    <label>职位:</label>
+                    <select class="form-select" id="filterPosition" style="width: 150px;">
+                        <option value="">全部</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>渠道:</label>
+                    <select class="form-select" id="filterChannel" style="width: 100px;">
+                        <option value="">全部</option>
+                        <option value="校招">校招</option>
+                        <option value="社招">社招</option>
+                    </select>
+                </div>
+                <div class="filter-item">
+                    <label>子渠道:</label>
+                    <select class="form-select" id="filterSubChannel" style="width: 100px;">
+                        <option value="">全部</option>
+                        <option value="秋招">秋招</option>
+                        <option value="春招">春招</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary btn-sm" onclick="loadData()">查询</button>
+                <button class="btn btn-outline btn-sm" onclick="resetFilter()">重置</button>
+            </div>
+
+            <!-- 数据表格 -->
+            <div class="table-wrapper">
+                <table class="data-table" id="weeklyTable">
+                    <thead>
+                        <tr>
+                            <th rowspan="2">序号</th>
+                            <th rowspan="2">需求职位</th>
+                            <th rowspan="2">渠道</th>
+                            <th rowspan="2">子渠道</th>
+                            <th rowspan="2">简历收取</th>
+                            <th rowspan="2">笔试安排<br>简历推送</th>
+                            <th rowspan="2">笔试完成</th>
+                            <th rowspan="2">笔试累计</th>
+                            <th rowspan="2">初试</th>
+                            <th rowspan="2">复试</th>
+                            <th rowspan="2">录用</th>
+                            <th rowspan="2">录用<br>人选</th>
+                            <th rowspan="2">签订三方<br>接受offer</th>
+                            <th rowspan="2">拒签/<br>取消录用</th>
+                            <th rowspan="2">违约</th>
+                            <th rowspan="2">待签<br>三方</th>
+                            <th rowspan="2">考虑中</th>
+                            <th rowspan="2">待沟通</th>
+                            <th rowspan="2">当周<br>报到数</th>
+                            <th rowspan="2">当周<br>报到新人</th>
+                            <th rowspan="2">备注</th>
+                            <th rowspan="2">日期范围</th>
+                            <th rowspan="2">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="weeklyTbody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 新增/编辑模态框 -->
+<div class="modal-overlay" id="weeklyModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-header">
+            <h5 id="modalTitle">新增每周招聘数据</h5>
+            <button class="modal-close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <input type="hidden" id="editId">
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label class="form-label">需求职位 *</label>
+                    <select class="form-select" id="positionName" onchange="onPositionChange()">
+                        <option value="">请选择</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">渠道 *</label>
+                    <select class="form-select" id="channel" onchange="onChannelChange()">
+                        <option value="校招">校招</option>
+                        <option value="社招">社招</option>
+                    </select>
+                </div>
+                <div class="form-group" id="subChannelGroup">
+                    <label class="form-label">子渠道</label>
+                    <select class="form-select" id="subChannel">
+                        <option value="秋招">秋招</option>
+                        <option value="春招">春招</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label class="form-label">简历收取</label>
+                    <input type="number" class="form-control" id="resumeReceived" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">笔试安排/简历推送</label>
+                    <input type="number" class="form-control" id="writtenExamScheduled" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">笔试完成</label>
+                    <input type="number" class="form-control" id="writtenExamCompleted" value="0" min="0">
+                </div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label class="form-label">笔试累计</label>
+                    <input type="number" class="form-control" id="writtenExamAccumulated" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">初试</label>
+                    <input type="number" class="form-control" id="firstInterview" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">复试</label>
+                    <input type="number" class="form-control" id="secondInterview" value="0" min="0">
+                </div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label class="form-label">录用</label>
+                    <input type="number" class="form-control" id="hired" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">签订三方/接受offer</label>
+                    <input type="number" class="form-control" id="offerSigned" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">拒签/取消录用</label>
+                    <input type="number" class="form-control" id="offerRejected" value="0" min="0">
+                </div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label class="form-label">违约</label>
+                    <input type="number" class="form-control" id="contractBroken" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">待签三方</label>
+                    <input type="number" class="form-control" id="pendingContract" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">考虑中</label>
+                    <input type="number" class="form-control" id="considering" value="0" min="0">
+                </div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label class="form-label">待沟通</label>
+                    <input type="number" class="form-control" id="pendingCommunication" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">当周报到数</label>
+                    <input type="number" class="form-control" id="weeklyOnboarded" value="0" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">开始日期</label>
+                    <input type="date" class="form-control" id="startDate">
+                </div>
+            </div>
+            <div class="form-row-3">
+                <div class="form-group">
+                    <label class="form-label">录用人选</label>
+                    <input type="text" class="form-control" id="hiredCandidates" placeholder="多人用逗号分隔">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">当周报到新人</label>
+                    <input type="text" class="form-control" id="weeklyOnboardedNames" placeholder="多人用逗号分隔">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">结束日期</label>
+                    <input type="date" class="form-control" id="endDate">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">备注</label>
+                    <input type="text" class="form-control" id="remark" placeholder="如: 已完成">
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeModal()">取消</button>
+            <button class="btn btn-primary" onclick="saveWeekly()">保存</button>
+        </div>
+    </div>
+</div>
+
+<script th:src="@{/static/js/weekly.js}"></script>
+</body>
+</html>
