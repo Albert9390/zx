@@ -306,6 +306,63 @@ table.data-table .text-danger {
     width: 800px;
 }
 
+.modal-dialog.modal-xl {
+    width: 1500px;
+    max-width: 96%;
+}
+
+/* 周信息展示 */
+.week-info-box {
+    background: #f0f7ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 18px;
+    margin-top: 8px;
+    text-align: center;
+}
+
+.week-info-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--primary-color);
+    margin-bottom: 10px;
+}
+
+.week-info-dates {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+    font-size: 14px;
+    color: var(--text-color);
+}
+
+/* 明细录入表格 */
+.detail-grid-wrapper {
+    max-height: 62vh;
+    overflow: auto;
+}
+
+.detail-input {
+    width: 62px;
+    padding: 4px 6px;
+    border: 1px solid #d1d5db;
+    border-radius: 4px;
+    font-size: 13px;
+    text-align: center;
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.detail-input:focus {
+    border-color: var(--primary-color);
+    box-shadow: 0 0 0 2px rgba(37,99,235,0.1);
+}
+
+.detail-input.text-input {
+    width: 110px;
+    text-align: left;
+}
+
 .modal-header {
     padding: 16px 20px;
     border-bottom: 1px solid var(--border-color);

@@ -2,6 +2,7 @@ package com.quectel.recruitment.controller;
 
 import com.quectel.recruitment.common.Result;
 import com.quectel.recruitment.entity.WeeklyRecruitment;
+import com.quectel.recruitment.entity.dto.WeeklyBatchSaveDTO;
 import com.quectel.recruitment.service.WeeklyRecruitmentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -23,14 +24,22 @@ public class WeeklyRecruitmentController {
      */
     @GetMapping("/list")
     public Result<List<WeeklyRecruitment>> list(
+            @RequestParam(required = false) Long weekId,
             @RequestParam(required = false) String positionName,
             @RequestParam(required = false) String channel,
             @RequestParam(required = false) String subChannel,
             @RequestParam(required = false) String startDate,
             @RequestParam(required = false) String endDate) {
         List<WeeklyRecruitment> list = weeklyRecruitmentService.queryList(
-                positionName, channel, subChannel, startDate, endDate);
+                weekId, positionName, channel, subChannel, startDate, endDate);
         return Result.success(list);
+    }
+
+    /** 批量保存某周的所有明细 */
+    @PostMapping("/saveBatch")
+    public Result<Void> saveBatch(@RequestBody WeeklyBatchSaveDTO dto) {
+        weeklyRecruitmentService.saveBatch(dto.getWeekId(), dto.getList());
+        return Result.success();
     }
 
     /** 添加每周数据 */

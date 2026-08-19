@@ -1,17 +1,45 @@
 /**
  * 每周招聘数据 JS
- * 按创建时间管理数据，默认创建时间为当前日期
+ * 采用"先添加周、再添加明细"的两步录入方式
+ * 周 = 当前（或所选）日期所在周，周一为开始、周日为结束
  */
 
-var positionList = [];
+var positionList = [];      // 所有需求职位
+var weekList = [];          // 所有招聘周
+var currentWeekInfo = null; // 当前所选日期的周信息
+
+// 每个职位下的渠道/子渠道行
+var CHANNEL_ROWS = [
+    {channel: '校招', subChannel: '秋招'},
+    {channel: '校招', subChannel: '春招'},
+    {channel: '社招', subChannel: ''}
+];
+
+// 明细弹框中可编辑字段（顺序与表头一致）
+var DETAIL_FIELDS = [
+    {key: 'resumeReceived',        type: 'number'},
+    {key: 'writtenExamScheduled',  type: 'number'},
+    {key: 'writtenExamCompleted',  type: 'number'},
+    {key: 'writtenExamAccumulated',type: 'number'},
+    {key: 'firstInterview',        type: 'number'},
+    {key: 'secondInterview',       type: 'number'},
+    {key: 'hired',                 type: 'number'},
+    {key: 'hiredCandidates',       type: 'text'},
+    {key: 'offerSigned',           type: 'number'},
+    {key: 'offerRejected',         type: 'number'},
+    {key: 'contractBroken',        type: 'number'},
+    {key: 'pendingContract',       type: 'number'},
+    {key: 'considering',           type: 'number'},
+    {key: 'pendingCommunication',  type: 'number'},
+    {key: 'weeklyOnboarded',       type: 'number'},
+    {key: 'weeklyOnboardedNames',  type: 'text'},
+    {key: 'remark',                type: 'text'}
+];
 
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
     loadPositions();
-    // 创建时间默认当前日期
-    document.getElementById('filterStartDate').value = today();
-    document.getElementById('filterEndDate').value = today();
-    loadData();
+    loadWeeks();
 });
 
 // 获取当前日期字符串
@@ -23,270 +51,249 @@ function today() {
     return y + '-' + m + '-' + day;
 }
 
-// 加载职位下拉列表
+// 周标题："2026年第34周"
+function weekTitle(w) {
+    return w.year + '年第' + w.weekNumber + '周';
+}
+
+// 加载所有需求职位
 function loadPositions() {
     fetch('/api/position/list')
         .then(res => res.json())
         .then(res => {
             if (res.code === 200) {
                 positionList = res.data || [];
-                // 填充筛选下拉
-                var filterSel = document.getElementById('filterPosition');
-                filterSel.innerHTML = '<option value="">全部</option>';
-                // 填充模态框下拉
-                var modalSel = document.getElementById('positionName');
-                modalSel.innerHTML = '<option value="">请选择</option>';
-                for (var i = 0; i < positionList.length; i++) {
-                    var p = positionList[i];
-                    filterSel.innerHTML += '<option value="' + escapeHtml(p.positionName) + '">' + escapeHtml(p.positionName) + '</option>';
-                    modalSel.innerHTML += '<option value="' + escapeHtml(p.positionName) + '">' + escapeHtml(p.positionName) + '</option>';
-                }
             }
         });
 }
 
-// 加载每周数据
-function loadData() {
-    var params = new URLSearchParams();
-    var positionName = document.getElementById('filterPosition').value;
-    var channel = document.getElementById('filterChannel').value;
-    var subChannel = document.getElementById('filterSubChannel').value;
-    var startDate = document.getElementById('filterStartDate').value;
-    var endDate = document.getElementById('filterEndDate').value;
-
-    if (positionName) params.append('positionName', positionName);
-    if (channel) params.append('channel', channel);
-    if (subChannel) params.append('subChannel', subChannel);
-    // 按创建时间范围筛选
-    if (startDate) params.append('startDate', startDate);
-    if (endDate) params.append('endDate', endDate);
-
-    fetch('/api/weekly/list?' + params.toString())
+// 加载所有招聘周
+function loadWeeks() {
+    fetch('/api/week/list')
         .then(res => res.json())
         .then(res => {
             if (res.code === 200) {
-                renderTable(res.data || []);
+                weekList = res.data || [];
+                renderWeeks(weekList);
             } else {
                 showToast('加载失败: ' + res.message, 'error');
             }
         });
 }
 
-// 渲染表格
-function renderTable(list) {
-    var tbody = document.getElementById('weeklyTbody');
+// 渲染周列表
+function renderWeeks(list) {
+    var tbody = document.getElementById('weekTbody');
     if (!list || list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="23" style="text-align:center;padding:30px;color:#999;">暂无数据</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#999;">暂无周数据，点击右上角「新增每周数据」开始录入</td></tr>';
         return;
     }
     var html = '';
     for (var i = 0; i < list.length; i++) {
-        var item = list[i];
+        var w = list[i];
         html += '<tr>' +
             '<td>' + (i + 1) + '</td>' +
-            '<td>' + escapeHtml(item.positionName) + '</td>' +
-            '<td>' + escapeHtml(item.channel || '') + '</td>' +
-            '<td>' + escapeHtml(item.subChannel || '') + '</td>' +
-            '<td>' + val(item.resumeReceived) + '</td>' +
-            '<td>' + val(item.writtenExamScheduled) + '</td>' +
-            '<td>' + val(item.writtenExamCompleted) + '</td>' +
-            '<td>' + val(item.writtenExamAccumulated) + '</td>' +
-            '<td>' + val(item.firstInterview) + '</td>' +
-            '<td>' + val(item.secondInterview) + '</td>' +
-            '<td>' + val(item.hired) + '</td>' +
-            '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(item.hiredCandidates || '') + '">' + escapeHtml(item.hiredCandidates || '') + '</td>' +
-            '<td>' + val(item.offerSigned) + '</td>' +
-            '<td>' + val(item.offerRejected) + '</td>' +
-            '<td>' + val(item.contractBroken) + '</td>' +
-            '<td>' + val(item.pendingContract) + '</td>' +
-            '<td>' + val(item.considering) + '</td>' +
-            '<td>' + val(item.pendingCommunication) + '</td>' +
-            '<td>' + val(item.weeklyOnboarded) + '</td>' +
-            '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(item.weeklyOnboardedNames || '') + '">' + escapeHtml(item.weeklyOnboardedNames || '') + '</td>' +
-            '<td>' + escapeHtml(item.remark || '') + '</td>' +
-            '<td style="white-space:nowrap;">' + escapeHtml(item.createDate || '') + '</td>' +
+            '<td style="font-weight:600;">' + escapeHtml(weekTitle(w)) + '</td>' +
+            '<td>' + escapeHtml(w.startDate || '') + '</td>' +
+            '<td>' + escapeHtml(w.endDate || '') + '</td>' +
+            '<td>' + (w.recordCount || 0) + '</td>' +
             '<td style="white-space:nowrap;">' +
-                '<button class="btn btn-warning btn-sm" onclick="openEditModal(' + item.id + ')">编辑</button> ' +
-                '<button class="btn btn-danger btn-sm" onclick="deleteWeekly(' + item.id + ')">删除</button>' +
+                '<button class="btn btn-warning btn-sm" onclick="editWeekDetail(' + w.id + ')">编辑明细</button> ' +
+                '<button class="btn btn-danger btn-sm" onclick="deleteWeek(' + w.id + ')">删除</button>' +
             '</td>' +
         '</tr>';
     }
     tbody.innerHTML = html;
 }
 
-// 打开新增模态框
-function openAddModal() {
-    document.getElementById('modalTitle').textContent = '新增每周招聘数据';
-    document.getElementById('editId').value = '';
-    // 重置所有输入
-    var inputs = document.querySelectorAll('#weeklyModal input, #weeklyModal select');
-    inputs.forEach(function(el) {
-        if (el.type === 'hidden') return;
-        if (el.tagName === 'SELECT') {
-            el.selectedIndex = 0;
-        } else if (el.type === 'number') {
-            el.value = '0';
-        } else {
-            el.value = '';
-        }
-    });
-    document.getElementById('channel').value = '校招';
-    document.getElementById('subChannel').value = '秋招';
-    onChannelChange();
-    // 创建时间默认当前日期
-    document.getElementById('createDate').value = today();
-    document.getElementById('weeklyModal').classList.add('show');
+// ===== 第一步：新增招聘周 =====
+function openWeekModal() {
+    document.getElementById('weekPickerDate').value = today();
+    fetchWeekInfo(today());
+    document.getElementById('weekModal').classList.add('show');
 }
 
-// 打开编辑模态框
-function openEditModal(id) {
-    fetch('/api/weekly/' + id)
+function onWeekDateChange() {
+    var d = document.getElementById('weekPickerDate').value;
+    if (d) fetchWeekInfo(d);
+}
+
+function fetchWeekInfo(date) {
+    fetch('/api/week/info?date=' + date)
         .then(res => res.json())
         .then(res => {
             if (res.code === 200 && res.data) {
-                var item = res.data;
-                document.getElementById('modalTitle').textContent = '编辑每周招聘数据';
-                document.getElementById('editId').value = item.id;
-                document.getElementById('positionName').value = item.positionName;
-                document.getElementById('channel').value = item.channel;
-                document.getElementById('subChannel').value = item.subChannel || '秋招';
-                onChannelChange();
-                document.getElementById('resumeReceived').value = item.resumeReceived || 0;
-                document.getElementById('writtenExamScheduled').value = item.writtenExamScheduled || 0;
-                document.getElementById('writtenExamCompleted').value = item.writtenExamCompleted || 0;
-                document.getElementById('writtenExamAccumulated').value = item.writtenExamAccumulated || 0;
-                document.getElementById('firstInterview').value = item.firstInterview || 0;
-                document.getElementById('secondInterview').value = item.secondInterview || 0;
-                document.getElementById('hired').value = item.hired || 0;
-                document.getElementById('hiredCandidates').value = item.hiredCandidates || '';
-                document.getElementById('offerSigned').value = item.offerSigned || 0;
-                document.getElementById('offerRejected').value = item.offerRejected || 0;
-                document.getElementById('contractBroken').value = item.contractBroken || 0;
-                document.getElementById('pendingContract').value = item.pendingContract || 0;
-                document.getElementById('considering').value = item.considering || 0;
-                document.getElementById('pendingCommunication').value = item.pendingCommunication || 0;
-                document.getElementById('weeklyOnboarded').value = item.weeklyOnboarded || 0;
-                document.getElementById('weeklyOnboardedNames').value = item.weeklyOnboardedNames || '';
-                document.getElementById('remark').value = item.remark || '';
-                document.getElementById('createDate').value = item.createDate || '';
-                document.getElementById('weeklyModal').classList.add('show');
+                currentWeekInfo = res.data;
+                document.getElementById('weekInfoTitle').textContent = weekTitle(res.data);
+                document.getElementById('weekInfoStart').textContent = res.data.startDate;
+                document.getElementById('weekInfoEnd').textContent = res.data.endDate;
             }
         });
 }
 
-// 关闭模态框
-function closeModal() {
-    document.getElementById('weeklyModal').classList.remove('show');
+function closeWeekModal() {
+    document.getElementById('weekModal').classList.remove('show');
 }
 
-// 渠道变化时控制子渠道显隐
-function onChannelChange() {
-    var channel = document.getElementById('channel').value;
-    var subGroup = document.getElementById('subChannelGroup');
-    if (channel === '社招') {
-        subGroup.style.display = 'none';
-        document.getElementById('subChannel').value = '';
-    } else {
-        subGroup.style.display = '';
-        if (!document.getElementById('subChannel').value) {
-            document.getElementById('subChannel').value = '秋招';
+// 创建周，成功后进入第二步（明细）
+function createWeekAndOpenDetail() {
+    if (!currentWeekInfo) {
+        showToast('请先选择日期', 'error');
+        return;
+    }
+    fetch('/api/week/add', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({startDate: currentWeekInfo.startDate, endDate: currentWeekInfo.endDate})
+    })
+        .then(res => res.json())
+        .then(res => {
+            if (res.code === 200 && res.data) {
+                showToast('周创建成功，请填写明细', 'success');
+                closeWeekModal();
+                openDetailModal(res.data, null);
+            } else {
+                showToast('创建失败: ' + res.message, 'error');
+            }
+        });
+}
+
+// ===== 第二步：周明细 =====
+function openDetailModal(week, existingRecords) {
+    document.getElementById('detailWeekId').value = week.id;
+    document.getElementById('detailModalTitle').textContent = '添加明细 - ' + weekTitle(week)
+        + '（' + (week.startDate || '') + ' ~ ' + (week.endDate || '') + '）';
+
+    // 构建已有记录查找表：职位|渠道|子渠道 -> 记录
+    var map = {};
+    (existingRecords || []).forEach(function(r) {
+        map[r.positionName + '|' + r.channel + '|' + (r.subChannel || '')] = r;
+    });
+
+    var html = '';
+    for (var i = 0; i < positionList.length; i++) {
+        var p = positionList[i];
+        for (var j = 0; j < CHANNEL_ROWS.length; j++) {
+            var cr = CHANNEL_ROWS[j];
+            var key = p.positionName + '|' + cr.channel + '|' + cr.subChannel;
+            var rec = map[key];
+            var isFirst = (j === 0);
+
+            html += '<tr class="detail-row' + (isFirst ? ' position-group' : '') + '"'
+                + ' data-position="' + escapeHtml(p.positionName) + '"'
+                + ' data-channel="' + escapeHtml(cr.channel) + '"'
+                + ' data-subchannel="' + escapeHtml(cr.subChannel) + '">';
+            html += '<td>' + (isFirst ? (i + 1) : '') + '</td>';
+            html += '<td>' + (isFirst ? escapeHtml(p.positionName) : '') + '</td>';
+            html += '<td>' + escapeHtml(cr.channel) + '</td>';
+            html += '<td>' + escapeHtml(cr.subChannel) + '</td>';
+
+            for (var k = 0; k < DETAIL_FIELDS.length; k++) {
+                var f = DETAIL_FIELDS[k];
+                var v = rec ? rec[f.key] : null;
+                if (f.type === 'number') {
+                    var numVal = (v === null || v === undefined || v === 0) ? '' : v;
+                    html += '<td><input type="number" class="detail-input" data-field="' + f.key + '" value="' + numVal + '" min="0" placeholder="0"></td>';
+                } else {
+                    html += '<td><input type="text" class="detail-input text-input" data-field="' + f.key + '" value="' + escapeHtml(v || '') + '"></td>';
+                }
+            }
+            html += '</tr>';
         }
     }
+    document.getElementById('detailTbody').innerHTML = html;
+    document.getElementById('detailModal').classList.add('show');
 }
 
-function onPositionChange() {}
+function closeDetailModal() {
+    document.getElementById('detailModal').classList.remove('show');
+}
 
-// 保存每周数据
-function saveWeekly() {
-    var positionName = document.getElementById('positionName').value;
-    if (!positionName) {
-        showToast('请选择需求职位', 'error');
+// 保存明细：收集填写了数据的行，批量提交
+function saveDetail() {
+    var weekId = document.getElementById('detailWeekId').value;
+    if (!weekId) {
+        showToast('缺少周信息', 'error');
         return;
     }
-    var createDate = document.getElementById('createDate').value;
-    if (!createDate) {
-        showToast('请选择创建时间', 'error');
-        return;
-    }
-    var data = {
-        positionName: positionName,
-        channel: document.getElementById('channel').value,
-        subChannel: document.getElementById('subChannel').value || null,
-        resumeReceived: parseInt(document.getElementById('resumeReceived').value) || 0,
-        writtenExamScheduled: parseInt(document.getElementById('writtenExamScheduled').value) || 0,
-        writtenExamCompleted: parseInt(document.getElementById('writtenExamCompleted').value) || 0,
-        writtenExamAccumulated: parseInt(document.getElementById('writtenExamAccumulated').value) || 0,
-        firstInterview: parseInt(document.getElementById('firstInterview').value) || 0,
-        secondInterview: parseInt(document.getElementById('secondInterview').value) || 0,
-        hired: parseInt(document.getElementById('hired').value) || 0,
-        hiredCandidates: document.getElementById('hiredCandidates').value,
-        offerSigned: parseInt(document.getElementById('offerSigned').value) || 0,
-        offerRejected: parseInt(document.getElementById('offerRejected').value) || 0,
-        contractBroken: parseInt(document.getElementById('contractBroken').value) || 0,
-        pendingContract: parseInt(document.getElementById('pendingContract').value) || 0,
-        considering: parseInt(document.getElementById('considering').value) || 0,
-        pendingCommunication: parseInt(document.getElementById('pendingCommunication').value) || 0,
-        weeklyOnboarded: parseInt(document.getElementById('weeklyOnboarded').value) || 0,
-        weeklyOnboardedNames: document.getElementById('weeklyOnboardedNames').value,
-        remark: document.getElementById('remark').value,
-        createDate: createDate || null
-    };
-    var id = document.getElementById('editId').value;
-    var url = '/api/weekly/add';
-    var method = 'POST';
-    if (id) {
-        data.id = parseInt(id);
-        url = '/api/weekly/update';
-        method = 'PUT';
-    }
-    fetch(url, {
-        method: method,
+    var rows = document.querySelectorAll('#detailTbody .detail-row');
+    var list = [];
+    rows.forEach(function(row) {
+        var rec = {
+            positionName: row.getAttribute('data-position'),
+            channel: row.getAttribute('data-channel'),
+            subChannel: row.getAttribute('data-subchannel') || null
+        };
+        var hasValue = false;
+        row.querySelectorAll('.detail-input').forEach(function(input) {
+            var field = input.getAttribute('data-field');
+            if (input.type === 'number') {
+                var n = parseInt(input.value) || 0;
+                rec[field] = n;
+                if (n !== 0) hasValue = true;
+            } else {
+                var s = input.value.trim();
+                rec[field] = s;
+                if (s) hasValue = true;
+            }
+        });
+        if (hasValue) list.push(rec);
+    });
+
+    fetch('/api/weekly/saveBatch', {
+        method: 'POST',
         headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify(data)
+        body: JSON.stringify({weekId: parseInt(weekId), list: list})
     })
         .then(res => res.json())
         .then(res => {
             if (res.code === 200) {
                 showToast('保存成功', 'success');
-                closeModal();
-                loadData();
+                closeDetailModal();
+                loadWeeks();
             } else {
                 showToast('保存失败: ' + res.message, 'error');
             }
         });
 }
 
-// 删除
-function deleteWeekly(id) {
-    if (!confirm('确认删除这条每周招聘数据吗？')) return;
-    fetch('/api/weekly/' + id, {method: 'DELETE'})
+// 编辑某周的明细
+function editWeekDetail(id) {
+    fetch('/api/weekly/list?weekId=' + id)
+        .then(res => res.json())
+        .then(res => {
+            var records = (res.code === 200) ? (res.data || []) : [];
+            var week = null;
+            for (var i = 0; i < weekList.length; i++) {
+                if (weekList[i].id === id) {
+                    week = weekList[i];
+                    break;
+                }
+            }
+            if (!week) {
+                showToast('未找到该周信息', 'error');
+                return;
+            }
+            openDetailModal(week, records);
+        });
+}
+
+// 删除某周及其明细
+function deleteWeek(id) {
+    if (!confirm('确认删除该周及其所有明细数据吗？此操作不可恢复！')) return;
+    fetch('/api/week/' + id, {method: 'DELETE'})
         .then(res => res.json())
         .then(res => {
             if (res.code === 200) {
                 showToast('删除成功', 'success');
-                loadData();
+                loadWeeks();
             } else {
                 showToast('删除失败: ' + res.message, 'error');
             }
         });
 }
 
-// 重置筛选
-function resetFilter() {
-    document.getElementById('filterStartDate').value = '';
-    document.getElementById('filterEndDate').value = '';
-    document.getElementById('filterPosition').value = '';
-    document.getElementById('filterChannel').value = '';
-    document.getElementById('filterSubChannel').value = '';
-    loadData();
-}
-
 // ===== 工具函数 =====
-function val(v) {
-    if (v === null || v === undefined || v === 0) return '<span style="color:#ccc;">0</span>';
-    return v;
-}
-
 function escapeHtml(str) {
     if (!str) return '';
     return String(str).replace(/[&<>"']/g, function(s) {

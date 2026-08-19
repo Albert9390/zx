@@ -22,11 +22,28 @@ CREATE TABLE `recruitment_position` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='职位需求表';
 
 -- ----------------------------
--- 2. 每周招聘数据表
+-- 2. 招聘周表
+-- ----------------------------
+DROP TABLE IF EXISTS `recruitment_week`;
+CREATE TABLE `recruitment_week` (
+    `id`           BIGINT   NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `year`         INT      NOT NULL COMMENT '年份',
+    `week_number`  INT      NOT NULL COMMENT '周数(ISO周)',
+    `start_date`   DATE     NOT NULL COMMENT '开始时间(周一)',
+    `end_date`     DATE     NOT NULL COMMENT '结束时间(周日)',
+    `create_time`  DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+    `update_time`  DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_year_week` (`year`, `week_number`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='招聘周表';
+
+-- ----------------------------
+-- 3. 每周招聘数据表
 -- ----------------------------
 DROP TABLE IF EXISTS `weekly_recruitment`;
 CREATE TABLE `weekly_recruitment` (
     `id`                        BIGINT       NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    `week_id`                   BIGINT       DEFAULT NULL COMMENT '所属招聘周ID',
     `position_name`             VARCHAR(100) NOT NULL COMMENT '需求职位',
     `channel`                   VARCHAR(50)  NOT NULL COMMENT '渠道(校招/社招)',
     `sub_channel`               VARCHAR(50)  DEFAULT NULL COMMENT '子渠道(秋招/春招)',
@@ -51,6 +68,7 @@ CREATE TABLE `weekly_recruitment` (
     `create_time`               DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`               DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
+    INDEX `idx_week_id` (`week_id`),
     INDEX `idx_position_channel` (`position_name`, `channel`, `sub_channel`),
     INDEX `idx_create_date` (`create_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='每周招聘数据表';

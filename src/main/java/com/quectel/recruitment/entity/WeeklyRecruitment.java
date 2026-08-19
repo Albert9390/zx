@@ -18,6 +18,9 @@ public class WeeklyRecruitment {
     @TableId(type = IdType.AUTO)
     private Long id;
 
+    /** 所属招聘周ID */
+    private Long weekId;
+
     /** 需求职位 */
     private String positionName;
 

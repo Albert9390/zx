@@ -61,6 +61,9 @@
     <select id="selectWeeklyList" resultType="com.quectel.recruitment.entity.WeeklyRecruitment">
         SELECT * FROM weekly_recruitment
         <where>
+            <if test="weekId != null">
+                AND week_id = #{weekId}
+            </if>
             <if test="positionName != null and positionName != ''">
                 AND position_name LIKE CONCAT('%', #{positionName}, '%')
             </if>
