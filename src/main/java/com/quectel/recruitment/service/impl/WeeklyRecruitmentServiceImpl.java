@@ -2,9 +2,12 @@ package com.quectel.recruitment.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.quectel.recruitment.entity.RecruitmentWeek;
 import com.quectel.recruitment.entity.WeeklyRecruitment;
+import com.quectel.recruitment.mapper.RecruitmentWeekMapper;
 import com.quectel.recruitment.mapper.WeeklyRecruitmentMapper;
 import com.quectel.recruitment.service.WeeklyRecruitmentService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 
@@ -17,6 +20,9 @@ import java.util.List;
 @Service
 public class WeeklyRecruitmentServiceImpl extends ServiceImpl<WeeklyRecruitmentMapper, WeeklyRecruitment> implements WeeklyRecruitmentService {
 
+    @Autowired
+    private RecruitmentWeekMapper recruitmentWeekMapper;
+
     @Override
     public List<WeeklyRecruitment> queryList(Long weekId, String positionName, String channel,
                                               String subChannel, String startDate, String endDate) {
@@ -25,6 +31,13 @@ public class WeeklyRecruitmentServiceImpl extends ServiceImpl<WeeklyRecruitmentM
 
     @Override
     public void saveBatch(Long weekId, List<WeeklyRecruitment> list) {
+        RecruitmentWeek week = recruitmentWeekMapper.selectById(weekId);
+        if (week == null) {
+            throw new IllegalArgumentException("该周数据不存在");
+        }
+        if (week.getStatus() != null && week.getStatus() == 1) {
+            throw new IllegalArgumentException("该周已提交，不允许修改明细");
+        }
         // 先删除该周旧明细
         remove(new LambdaQueryWrapper<WeeklyRecruitment>()
                 .eq(WeeklyRecruitment::getWeekId, weekId));

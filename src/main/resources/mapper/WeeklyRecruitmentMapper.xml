@@ -5,7 +5,7 @@
 
     <!--
         汇总查询：按 需求职位 + 渠道 + 子渠道 分组求和
-        总表数据 = 每周招聘数据的 SUM
+        总表数据 = 已提交周的每周招聘数据的 SUM
     -->
     <select id="selectTotalReport" resultType="com.quectel.recruitment.entity.vo.TotalRecruitmentVO">
         SELECT
@@ -51,6 +51,7 @@
                 SUM(pending_communication)     AS pending_communication,
                 SUM(weekly_onboarded)          AS total_onboarded
             FROM weekly_recruitment
+            WHERE week_id IN (SELECT id FROM recruitment_week WHERE status = 1)
             GROUP BY position_name, channel, sub_channel
         ) t
         RIGHT JOIN recruitment_position p ON p.position_name = t.position_name

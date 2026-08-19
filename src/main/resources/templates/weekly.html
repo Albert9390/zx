@@ -38,6 +38,7 @@
                             <th>开始时间(周一)</th>
                             <th>结束时间(周日)</th>
                             <th>明细条数</th>
+                            <th>状态</th>
                             <th>操作</th>
                         </tr>
                     </thead>
@@ -85,6 +86,16 @@
         </div>
         <div class="modal-body">
             <input type="hidden" id="detailWeekId">
+            <!-- 职位搜索（下拉选择） -->
+            <div class="filter-bar">
+                <div class="filter-item">
+                    <label>职位筛选:</label>
+                    <select class="form-select" id="detailSearchSelect" style="width: 220px;" onchange="onDetailSearch()">
+                        <option value="">全部职位</option>
+                    </select>
+                </div>
+                <span class="filter-tip" id="detailSearchTip"></span>
+            </div>
             <div class="table-wrapper detail-grid-wrapper">
                 <table class="data-table" id="detailTable">
                     <thead>
@@ -118,8 +129,8 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-secondary" onclick="closeDetailModal()">取消</button>
-            <button class="btn btn-primary" onclick="saveDetail()">保存明细</button>
+            <button class="btn btn-secondary" onclick="closeDetailModal()" id="detailCancelBtn">取消</button>
+            <button class="btn btn-primary" onclick="saveDetail()" id="detailSaveBtn">保存明细</button>
         </div>
     </div>
 </div>

@@ -33,7 +33,16 @@ public interface RecruitmentWeekService extends IService<RecruitmentWeek> {
     RecruitmentWeek addWeek(RecruitmentWeek week);
 
     /**
+     * 提交招聘周（锁定，数据计入总报表，之后不可修改/删除）
+     *
+     * @param id 周ID
+     * @return 提交后的周
+     */
+    RecruitmentWeek submitWeek(Long id);
+
+    /**
      * 删除招聘周（同时删除该周下的每周招聘明细）
+     * 已提交的周不可删除
      *
      * @param id 周ID
      */

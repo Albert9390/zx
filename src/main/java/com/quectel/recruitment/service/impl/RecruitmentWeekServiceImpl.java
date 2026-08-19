@@ -85,7 +85,28 @@ public class RecruitmentWeekServiceImpl extends ServiceImpl<RecruitmentWeekMappe
     }
 
     @Override
+    public RecruitmentWeek submitWeek(Long id) {
+        RecruitmentWeek week = getById(id);
+        if (week == null) {
+            throw new IllegalArgumentException("该周数据不存在");
+        }
+        if (week.getStatus() != null && week.getStatus() == 1) {
+            throw new IllegalArgumentException("该周已提交，无需重复提交");
+        }
+        week.setStatus(1);
+        updateById(week);
+        return week;
+    }
+
+    @Override
     public void deleteWeek(Long id) {
+        RecruitmentWeek week = getById(id);
+        if (week == null) {
+            throw new IllegalArgumentException("该周数据不存在");
+        }
+        if (week.getStatus() != null && week.getStatus() == 1) {
+            throw new IllegalArgumentException("该周已提交，不允许删除");
+        }
         // 先删除该周下的每周招聘明细
         weeklyRecruitmentService.remove(new LambdaQueryWrapper<WeeklyRecruitment>()
                 .eq(WeeklyRecruitment::getWeekId, id));

@@ -31,6 +31,7 @@ CREATE TABLE `recruitment_week` (
     `week_number`  INT      NOT NULL COMMENT '周数(ISO周)',
     `start_date`   DATE     NOT NULL COMMENT '开始时间(周一)',
     `end_date`     DATE     NOT NULL COMMENT '结束时间(周日)',
+    `status`       TINYINT  NOT NULL DEFAULT 0 COMMENT '提交状态: 0=未提交, 1=已提交',
     `create_time`  DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`  DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),

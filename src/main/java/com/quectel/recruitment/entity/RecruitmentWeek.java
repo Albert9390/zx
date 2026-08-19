@@ -32,6 +32,9 @@ public class RecruitmentWeek {
     /** 结束时间(周日) */
     private LocalDate endDate;
 
+    /** 提交状态: 0=未提交(草稿), 1=已提交(锁定) */
+    private Integer status;
+
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
 

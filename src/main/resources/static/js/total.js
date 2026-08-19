@@ -56,58 +56,91 @@ function statCard(value, label) {
     '</div>';
 }
 
-// 渲染表格
+// 渲染表格（合并 序号/需求职位/需求人数/剩余人数/渠道 单元格）
 function renderTable(list) {
     var tbody = document.getElementById('totalTbody');
     if (!list || list.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="29" style="text-align:center;padding:30px;color:#999;">暂无数据，请先在「每周招聘」中录入数据</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="28" style="text-align:center;padding:30px;color:#999;">暂无数据，请先在「每周招聘」中录入并提交数据</td></tr>';
         return;
     }
 
     var html = '';
-    var currentPos = '';
     var posIndex = 0;
-
-    for (var i = 0; i < list.length; i++) {
+    var i = 0;
+    while (i < list.length) {
         var item = list[i];
-        // 职位分组：每个职位的第一行高亮
-        var isGroupStart = item.positionName !== currentPos;
-        if (isGroupStart) {
-            currentPos = item.positionName;
-            posIndex++;
+        // 计算当前职位的连续行数
+        var posSpan = 1;
+        while (i + posSpan < list.length && list[i + posSpan].positionName === item.positionName) {
+            posSpan++;
         }
-        var rowClass = isGroupStart ? 'position-group' : '';
+        posIndex++;
 
-        html += '<tr class="' + rowClass + '">' +
-            '<td>' + (isGroupStart ? posIndex : '') + '</td>' +
-            '<td>' + (isGroupStart ? escapeHtml(item.positionName) : '') + '</td>' +
-            '<td>' + (isGroupStart ? val(item.demandCount) : '') + '</td>' +
-            '<td>' + (isGroupStart ? val(item.remainingCount) : '') + '</td>' +
-            '<td>' + escapeHtml(item.channel || '') + '</td>' +
-            '<td>' + escapeHtml(item.subChannel || '') + '</td>' +
-            '<td>' + val(item.resumeReceived) + '</td>' +
-            '<td>' + val(item.writtenExamScheduled) + '</td>' +
-            '<td>' + val(item.writtenExamCompleted) + '</td>' +
-            '<td>' + val(item.writtenExamAccumulated) + '</td>' +
-            '<td>' + pct(item.examAttendanceRate) + '</td>' +
-            '<td>' + pct(item.examPassRate) + '</td>' +
-            '<td>' + val(item.firstInterview) + '</td>' +
-            '<td>' + val(item.secondInterview) + '</td>' +
-            '<td>' + val(item.hired) + '</td>' +
-            '<td>' + val(item.hiredAccumulated) + '</td>' +
-            '<td>' + pct(item.interviewPassRate) + '</td>' +
-            '<td>' + val(item.offerSigned) + '</td>' +
-            '<td>' + pct(item.signRate) + '</td>' +
-            '<td>' + val(item.offerRejected) + '</td>' +
-            '<td>' + pct(item.rejectRate) + '</td>' +
-            '<td>' + val(item.contractBroken) + '</td>' +
-            '<td>' + pct(item.breachRate) + '</td>' +
-            '<td>' + val(item.pendingContract) + '</td>' +
-            '<td>' + val(item.considering) + '</td>' +
-            '<td>' + val(item.pendingCommunication) + '</td>' +
-            '<td>' + val(item.totalOnboarded) + '</td>' +
-            '<td>' + escapeHtml(item.remark || '') + '</td>' +
-        '</tr>';
+        // 遍历该职位的每一行
+        for (var r = 0; r < posSpan; r++) {
+            var row = list[i + r];
+            var isFirst = (r === 0);
+            // 渠道单元格：计算从当前行开始连续相同渠道的行数
+            var chSpan = 1;
+            while (r + chSpan < posSpan) {
+                var next = list[i + r + chSpan];
+                if ((row.channel || '') === (next.channel || '')) {
+                    chSpan++;
+                } else {
+                    break;
+                }
+            }
+
+            html += '<tr>';
+
+            // 序号列：职位首行合并
+            if (isFirst) {
+                html += '<td rowspan="' + posSpan + '" class="merged-cell">' + posIndex + '</td>';
+            }
+            // 需求职位列：职位首行合并
+            if (isFirst) {
+                html += '<td rowspan="' + posSpan + '" class="merged-cell position-cell">' + escapeHtml(item.positionName) + '</td>';
+            }
+            // 需求人数：职位首行合并
+            if (isFirst) {
+                html += '<td rowspan="' + posSpan + '" class="merged-cell">' + val(item.demandCount) + '</td>';
+            }
+            // 剩余人数：职位首行合并
+            if (isFirst) {
+                html += '<td rowspan="' + posSpan + '" class="merged-cell">' + val(item.remainingCount) + '</td>';
+            }
+            // 渠道列：仅当是职位首行，或渠道发生变化时才输出（合并相同渠道）
+            if (r === 0 || (row.channel || '') !== (list[i + r - 1].channel || '')) {
+                html += '<td rowspan="' + chSpan + '" class="merged-cell">' + escapeHtml(row.channel || '') + '</td>';
+            }
+            // 子渠道列
+            html += '<td>' + escapeHtml(row.subChannel || '') + '</td>';
+
+            html += '<td>' + val(row.resumeReceived) + '</td>' +
+                '<td>' + val(row.writtenExamScheduled) + '</td>' +
+                '<td>' + val(row.writtenExamCompleted) + '</td>' +
+                '<td>' + val(row.writtenExamAccumulated) + '</td>' +
+                '<td>' + pct(row.examAttendanceRate) + '</td>' +
+                '<td>' + pct(row.examPassRate) + '</td>' +
+                '<td>' + val(row.firstInterview) + '</td>' +
+                '<td>' + val(row.secondInterview) + '</td>' +
+                '<td>' + val(row.hired) + '</td>' +
+                '<td>' + val(row.hiredAccumulated) + '</td>' +
+                '<td>' + pct(row.interviewPassRate) + '</td>' +
+                '<td>' + val(row.offerSigned) + '</td>' +
+                '<td>' + pct(row.signRate) + '</td>' +
+                '<td>' + val(row.offerRejected) + '</td>' +
+                '<td>' + pct(row.rejectRate) + '</td>' +
+                '<td>' + val(row.contractBroken) + '</td>' +
+                '<td>' + pct(row.breachRate) + '</td>' +
+                '<td>' + val(row.pendingContract) + '</td>' +
+                '<td>' + val(row.considering) + '</td>' +
+                '<td>' + val(row.pendingCommunication) + '</td>' +
+                '<td>' + val(row.totalOnboarded) + '</td>' +
+                '<td>' + escapeHtml(row.remark || '') + '</td>' +
+            '</tr>';
+        }
+        i += posSpan;
     }
     tbody.innerHTML = html;
 }

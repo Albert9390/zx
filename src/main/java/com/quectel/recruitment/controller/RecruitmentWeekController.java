@@ -42,7 +42,13 @@ public class RecruitmentWeekController {
         return Result.success(recruitmentWeekService.addWeek(week));
     }
 
-    /** 删除招聘周（连同其明细） */
+    /** 提交招聘周（锁定，计入总报表） */
+    @PostMapping("/{id}/submit")
+    public Result<RecruitmentWeek> submit(@PathVariable Long id) {
+        return Result.success(recruitmentWeekService.submitWeek(id));
+    }
+
+    /** 删除招聘周（连同其明细，已提交的周不可删除） */
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {
         recruitmentWeekService.deleteWeek(id);
