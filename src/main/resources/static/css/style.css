@@ -1,47 +1,60 @@
 /* ============================================================
    招聘报表管理系统 - 全局样式
-   设计方向：克制、专业的内部数据工具
-   - 暖中性色 + 深松绿单一强调色（无渐变、无毛玻璃）
-   - 系统字体栈（内网环境，不依赖外网字体）
-   - 表格数字 tabular-nums 对齐
+   设计方向：「清雾」—— 简单清爽的低饱和风格
+   - 低饱和雾粉 + 近白底色，克制、干净
+   - 纯色为主，去渐变、去重阴影
+   - 标题圆体柔和，正文黑体可读，数字 tabular-nums
    ============================================================ */
 
 :root {
-    /* 强调色（10% 使用）—— 深松绿 */
-    --primary-color: #0f766e;
-    --primary-hover: #115e59;
-    --primary-dark: #134e4a;
-    --primary-light: #f0fdfa;
-    --primary-border: #99f6e4;
+    /* 主色 —— 低饱和雾粉 */
+    --primary-color: #c07f8f;
+    --primary-hover: #a96b7b;
+    --primary-dark: #8a5665;
+    --primary-light: #f7eff1;
+    --primary-border: #ecdde1;
 
-    /* 语义色 */
-    --success-color: #15803d;
-    --success-light: #dcfce7;
-    --danger-color: #b91c1c;
-    --danger-light: #fee2e2;
-    --warning-color: #b45309;
-    --warning-light: #fef3c7;
-    --info-color: #1d4ed8;
-    --info-light: #dbeafe;
+    /* 强调色 —— 灰紫（少量点缀） */
+    --accent-color: #9d90a8;
+    --accent-hover: #877992;
+    --accent-light: #f3f0f5;
+    --accent-border: #e5e0ea;
 
-    /* 中性色（暖调 tinted neutrals，非纯灰） */
-    --bg-color: #faf9f7;
+    /* 语义色（低饱和） */
+    --success-color: #6f9c80;
+    --success-light: #ecf3ee;
+    --danger-color: #bf7d7d;
+    --danger-light: #f7eded;
+    --warning-color: #c39a62;
+    --warning-light: #f8f1e6;
+    --info-color: #8796b5;
+    --info-light: #edf0f6;
+
+    /* 中性色 —— 清爽近白 */
+    --bg-color: #f8f6f5;
     --card-bg: #ffffff;
-    --surface-muted: #f5f4f1;
-    --text-color: #1c1917;
-    --text-secondary: #57534e;
-    --text-muted: #a8a29e;
-    --border-color: #e8e5e1;
-    --border-strong: #d6d2cd;
+    --surface-muted: #f3f0ee;
+    --text-color: #3a3536;
+    --text-secondary: #6e6668;
+    --text-muted: #a89fa2;
+    --border-color: #e9e3e4;
+    --border-strong: #d9d1d3;
 
-    /* 阴影（克制、极浅） */
-    --shadow-sm: 0 1px 2px rgba(28, 25, 23, 0.04);
-    --shadow-md: 0 2px 8px rgba(28, 25, 23, 0.06);
-    --shadow-lg: 0 8px 28px rgba(28, 25, 23, 0.12);
+    /* 阴影 —— 中性灰、极浅 */
+    --shadow-sm: 0 1px 2px rgba(60, 50, 55, 0.05);
+    --shadow-md: 0 3px 10px rgba(60, 50, 55, 0.08);
+    --shadow-lg: 0 12px 30px rgba(60, 50, 55, 0.14);
 
     --radius: 10px;
     --radius-sm: 8px;
     --radius-lg: 12px;
+
+    /* 字体：标题圆体，正文黑体 */
+    --font-display: "YouYuan", "幼圆", "Yuanti SC", "Microsoft YaHei", sans-serif;
+    --font-body: -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    --font-num: -apple-system, BlinkMacSystemFont, "Segoe UI",
+        "Microsoft YaHei", system-ui, sans-serif;
 
     /* 动效 */
     --ease-out: cubic-bezier(0.25, 1, 0.5, 1);
@@ -55,8 +68,7 @@
 }
 
 body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI",
-        "Microsoft YaHei", "PingFang SC", system-ui, sans-serif;
+    font-family: var(--font-body);
     background: var(--bg-color);
     color: var(--text-color);
     font-size: 14px;
@@ -65,11 +77,11 @@ body {
     text-rendering: optimizeLegibility;
 }
 
-/* ===== 导航栏（白底 + 细下边框，克制） ===== */
+/* ===== 导航栏 —— 白底 + 细下边框 ===== */
 .navbar {
     background: var(--card-bg);
     color: var(--text-color);
-    padding: 0 28px;
+    padding: 0 32px;
     height: 58px;
     display: flex;
     align-items: center;
@@ -81,17 +93,18 @@ body {
 }
 
 .navbar-brand {
-    font-size: 16px;
+    font-family: var(--font-display);
+    font-size: 17px;
     font-weight: 700;
     color: var(--text-color);
     text-decoration: none;
     display: flex;
     align-items: center;
     gap: 10px;
-    letter-spacing: 0.2px;
+    letter-spacing: 0.5px;
 }
 
-.navbar-brand span {
+.navbar-brand .brand-mark {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -99,8 +112,10 @@ body {
     height: 30px;
     background: var(--primary-color);
     color: #fff;
-    border-radius: 7px;
-    font-size: 16px;
+    border-radius: 8px;
+    font-size: 15px;
+    font-weight: 700;
+    font-family: var(--font-display);
 }
 
 .navbar-nav {
@@ -128,7 +143,7 @@ body {
 }
 
 .navbar-nav a.active {
-    color: var(--primary-color);
+    color: var(--primary-dark);
     font-weight: 600;
 }
 
@@ -145,9 +160,33 @@ body {
 
 /* ===== 容器 ===== */
 .container-fluid {
-    padding: 24px 28px;
+    padding: 26px 32px;
     max-width: 1680px;
     margin: 0 auto;
+}
+
+/* ===== 页面标题带 ===== */
+.page-heading {
+    display: flex;
+    align-items: baseline;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.page-heading .eyebrow {
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.page-heading h1 {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: var(--text-color);
 }
 
 /* ===== 卡片 ===== */
@@ -161,15 +200,16 @@ body {
 }
 
 .card-header {
-    padding: 16px 22px;
+    padding: 15px 22px;
     border-bottom: 1px solid var(--border-color);
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: var(--surface-muted);
+    background: var(--card-bg);
 }
 
 .card-header h5 {
+    font-family: var(--font-display);
     font-size: 15px;
     font-weight: 700;
     margin: 0;
@@ -177,13 +217,14 @@ body {
     display: flex;
     align-items: center;
     gap: 10px;
+    letter-spacing: 0.3px;
 }
 
 .card-header h5::before {
     content: "";
     display: inline-block;
-    width: 3px;
-    height: 16px;
+    width: 4px;
+    height: 15px;
     background: var(--primary-color);
     border-radius: 2px;
 }
@@ -240,7 +281,7 @@ body {
 .form-control:focus,
 .form-select:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.12);
+    box-shadow: 0 0 0 3px rgba(192, 127, 143, 0.12);
 }
 
 .form-label {
@@ -255,7 +296,7 @@ body {
     margin-bottom: 16px;
 }
 
-/* ===== 按钮（实色，无渐变；hover 只改背景，不上浮） ===== */
+/* ===== 按钮 —— 纯色，克制 ===== */
 .btn {
     padding: 7px 18px;
     border: 1px solid transparent;
@@ -290,7 +331,7 @@ body {
 }
 
 .btn-success:hover {
-    background: #166534;
+    background: #5e8a6e;
 }
 
 .btn-danger {
@@ -299,7 +340,7 @@ body {
 }
 
 .btn-danger:hover {
-    background: #991b1b;
+    background: #ab6b6b;
 }
 
 .btn-warning {
@@ -308,7 +349,7 @@ body {
 }
 
 .btn-warning:hover {
-    background: #92400e;
+    background: #b08850;
 }
 
 .btn-info {
@@ -317,7 +358,7 @@ body {
 }
 
 .btn-info:hover {
-    background: #1e40af;
+    background: #74829f;
 }
 
 .btn-secondary {
@@ -364,12 +405,13 @@ table.data-table {
 
 table.data-table thead th {
     background: var(--surface-muted);
+    color: var(--text-secondary);
     padding: 10px 12px;
     text-align: center;
     font-weight: 600;
-    color: var(--text-secondary);
-    border-bottom: 1px solid var(--border-strong);
+    font-size: 12.5px;
     border-right: 1px solid var(--border-color);
+    border-bottom: 1px solid var(--border-strong);
     white-space: nowrap;
     position: sticky;
     top: 0;
@@ -386,6 +428,8 @@ table.data-table tbody td {
     border-bottom: 1px solid var(--border-color);
     border-right: 1px solid var(--border-color);
     color: var(--text-color);
+    font-variant-numeric: tabular-nums;
+    font-family: var(--font-num);
     transition: background 0.12s var(--ease-out);
 }
 
@@ -402,16 +446,24 @@ table.data-table tbody tr:hover {
 }
 
 table.data-table tbody tr:nth-child(even) {
-    background: #fafaf8;
+    background: #fcfbfa;
 }
 
 table.data-table tbody tr:nth-child(even):hover {
     background: var(--primary-light);
 }
 
-table.data-table tbody tr.position-group td {
-    background: var(--primary-light);
+table.data-table tbody tr.position-group td,
+table.data-table .merged-cell {
+    background: var(--surface-muted);
     font-weight: 600;
+}
+
+table.data-table .position-cell {
+    background: var(--primary-light);
+    color: var(--primary-dark);
+    font-weight: 700;
+    font-family: var(--font-display);
 }
 
 table.data-table .text-right {
@@ -431,7 +483,7 @@ table.data-table .text-danger {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(28, 25, 23, 0.44);
+    background: rgba(50, 42, 46, 0.4);
     z-index: 2000;
     justify-content: center;
     align-items: center;
@@ -455,7 +507,7 @@ table.data-table .text-danger {
 }
 
 @keyframes modalIn {
-    from { transform: translateY(12px); opacity: 0; }
+    from { transform: translateY(14px); opacity: 0; }
     to { transform: translateY(0); opacity: 1; }
 }
 
@@ -478,9 +530,11 @@ table.data-table .text-danger {
 }
 
 .modal-header h5 {
-    font-size: 15px;
+    font-family: var(--font-display);
+    font-size: 16px;
     font-weight: 700;
     margin: 0;
+    color: var(--text-color);
 }
 
 .modal-close {
@@ -520,20 +574,20 @@ table.data-table .text-danger {
 
 /* 周信息展示 */
 .week-info-box {
-    background: var(--primary-light);
-    border: 1px solid var(--primary-border);
+    background: var(--surface-muted);
+    border: 1px solid var(--border-color);
     border-radius: var(--radius-sm);
-    padding: 22px;
+    padding: 20px;
     margin-top: 10px;
     text-align: center;
 }
 
 .week-info-title {
-    font-size: 22px;
+    font-family: var(--font-display);
+    font-size: 20px;
     font-weight: 700;
-    color: var(--primary-dark);
+    color: var(--text-color);
     margin-bottom: 10px;
-    letter-spacing: 0.3px;
 }
 
 .week-info-dates {
@@ -546,9 +600,10 @@ table.data-table .text-danger {
 }
 
 .week-info-dates span {
-    color: var(--primary-color);
+    color: var(--primary-dark);
     font-weight: 700;
     font-variant-numeric: tabular-nums;
+    font-family: var(--font-num);
 }
 
 /* 明细录入表格 */
@@ -557,7 +612,6 @@ table.data-table .text-danger {
     overflow: auto;
 }
 
-/* 明细表合并单元格 */
 .merged-cell {
     vertical-align: middle;
     font-weight: 600;
@@ -569,6 +623,7 @@ table.data-table .text-danger {
     background: var(--primary-light);
     color: var(--primary-dark);
     font-weight: 700;
+    font-family: var(--font-display);
 }
 
 .filter-tip {
@@ -587,6 +642,7 @@ table.data-table .text-danger {
     background: var(--card-bg);
     outline: none;
     font-variant-numeric: tabular-nums;
+    font-family: var(--font-num);
     transition: border-color 0.15s var(--ease-out),
         box-shadow 0.15s var(--ease-out);
 }
@@ -597,12 +653,13 @@ table.data-table .text-danger {
 
 .detail-input:focus {
     border-color: var(--primary-color);
-    box-shadow: 0 0 0 2px rgba(15, 118, 110, 0.14);
+    box-shadow: 0 0 0 2px rgba(192, 127, 143, 0.14);
 }
 
 .detail-input.text-input {
     width: 110px;
     text-align: left;
+    font-family: var(--font-body);
 }
 
 .detail-input-readonly {
@@ -690,13 +747,11 @@ table.data-table .text-danger {
 
 .stat-card {
     background: var(--card-bg);
-    padding: 20px 22px;
+    padding: 18px 22px;
     border-radius: var(--radius);
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-color);
     text-align: center;
-    position: relative;
-    overflow: hidden;
     transition: box-shadow 0.2s var(--ease-out);
 }
 
@@ -704,21 +759,12 @@ table.data-table .text-danger {
     box-shadow: var(--shadow-md);
 }
 
-.stat-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--primary-color);
-}
-
 .stat-card .stat-value {
-    font-size: 30px;
+    font-family: var(--font-num);
+    font-size: 34px;
     font-weight: 700;
     color: var(--text-color);
-    line-height: 1.2;
+    line-height: 1.1;
     font-variant-numeric: tabular-nums;
 }
 
@@ -742,28 +788,116 @@ table.data-table .text-danger {
 }
 
 /* ===== 首页 ===== */
-.welcome-banner {
-    background: var(--primary-color);
-    color: #fff;
+/* 招聘漏斗 —— 简洁、浅色 */
+.funnel-banner {
+    background: var(--card-bg);
+    color: var(--text-color);
     border-radius: var(--radius);
-    padding: 40px 36px;
+    padding: 32px 32px 36px;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid var(--border-color);
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+}
+
+.funnel-heading {
     text-align: center;
-    box-shadow: var(--shadow-md);
-    margin-bottom: 24px;
+    margin-bottom: 22px;
 }
 
-.welcome-banner h2 {
-    font-size: 24px;
+.funnel-heading .eyebrow {
+    font-family: var(--font-display);
+    font-size: 12px;
+    letter-spacing: 2px;
+    color: var(--text-muted);
+    font-weight: 600;
+}
+
+.funnel-heading h2 {
+    font-family: var(--font-display);
+    font-size: 22px;
     font-weight: 700;
-    margin-bottom: 10px;
-    letter-spacing: 0.3px;
+    margin-top: 4px;
+    letter-spacing: 1px;
+    color: var(--text-color);
 }
 
-.welcome-banner p {
-    color: rgba(255, 255, 255, 0.85);
-    font-size: 14.5px;
+.funnel-heading p {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin-top: 6px;
 }
 
+/* 漏斗主体 */
+.funnel {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.funnel-stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.funnel-bar {
+    height: 44px;
+    border-radius: var(--radius-sm);
+    background: var(--primary-light);
+    border: 1px solid var(--primary-border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--primary-dark);
+    letter-spacing: 1px;
+    transition: background 0.15s var(--ease-out);
+}
+
+.funnel-stage:hover .funnel-bar {
+    background: #f2e3e7;
+}
+
+/* 录用环节略深一点，作轻微强调 */
+.funnel-stage.stage-hired .funnel-bar {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: #fff;
+}
+
+.funnel-stage.stage-hired .funnel-bar:hover {
+    background: var(--primary-hover);
+}
+
+.funnel-stage .stage-name {
+    font-family: var(--font-display);
+    font-size: 13px;
+    margin-top: 8px;
+    letter-spacing: 0.5px;
+    color: var(--text-color);
+    font-weight: 600;
+}
+
+.funnel-stage .stage-num {
+    font-family: var(--font-num);
+    font-size: 12px;
+    color: var(--text-muted);
+    margin-top: 2px;
+}
+
+.funnel-arrow {
+    color: var(--text-muted);
+    font-size: 16px;
+    margin: 0 10px;
+}
+
+/* 首页卡片网格 */
 .home-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -774,7 +908,7 @@ table.data-table .text-danger {
 .home-card {
     background: var(--card-bg);
     border-radius: var(--radius);
-    padding: 28px 26px;
+    padding: 26px 24px;
     box-shadow: var(--shadow-sm);
     border: 1px solid var(--border-color);
     text-decoration: none;
@@ -785,37 +919,29 @@ table.data-table .text-danger {
     overflow: hidden;
 }
 
-.home-card::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 3px;
-    background: var(--primary-color);
-}
-
 .home-card:hover {
     box-shadow: var(--shadow-md);
     border-color: var(--primary-border);
 }
 
 .home-card .icon {
-    font-size: 34px;
+    font-size: 24px;
     margin-bottom: 12px;
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    width: 56px;
-    height: 56px;
-    background: var(--primary-light);
-    border-radius: 12px;
+    width: 48px;
+    height: 48px;
+    background: var(--surface-muted);
+    border-radius: 10px;
 }
 
 .home-card h4 {
-    font-size: 17px;
+    font-family: var(--font-display);
+    font-size: 16px;
     font-weight: 700;
     margin-bottom: 6px;
+    color: var(--text-color);
 }
 
 .home-card p {
@@ -824,10 +950,18 @@ table.data-table .text-danger {
     line-height: 1.7;
 }
 
-.home-card.green::before { background: var(--success-color); }
 .home-card.green .icon { background: var(--success-light); }
-.home-card.orange::before { background: var(--warning-color); }
-.home-card.orange .icon { background: var(--warning-light); }
+.home-card.orange .icon { background: var(--accent-light); }
+
+/* ===== 响应式 ===== */
+@media (max-width: 768px) {
+    .navbar { padding: 0 16px; }
+    .navbar-nav a { padding: 0 10px; font-size: 13px; }
+    .container-fluid { padding: 18px 16px; }
+    .funnel-bar { height: 40px; font-size: 14px; }
+    .funnel-arrow { display: none; }
+    .stat-card .stat-value { font-size: 30px; }
+}
 
 /* ===== 无障碍：减少动效 ===== */
 @media (prefers-reduced-motion: reduce) {

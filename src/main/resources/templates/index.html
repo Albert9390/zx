@@ -11,7 +11,7 @@
 <!-- 导航栏 -->
 <nav class="navbar">
     <a class="navbar-brand" th:href="@{/}">
-        <span>📋</span> 招聘报表管理系统
+        <span class="brand-mark">招</span> 招聘报表管理系统
     </a>
     <ul class="navbar-nav">
         <li><a th:href="@{/}" class="active">首页</a></li>
@@ -22,9 +22,44 @@
 </nav>
 
 <div class="container-fluid">
-    <div class="welcome-banner">
-        <h2>欢迎使用招聘报表管理系统</h2>
-        <p>管理每周招聘数据，自动汇总生成总报表</p>
+    <!-- 招聘漏斗 —— 签名元素：人才层层筛选 -->
+    <div class="funnel-banner">
+        <div class="funnel-heading">
+            <div class="eyebrow">Recruitment Journey</div>
+            <h2>招聘 · 成长旅程</h2>
+            <p>从相遇、相识到携手同行，每一步都值得用心记录</p>
+        </div>
+        <div class="funnel">
+            <div class="funnel-stage">
+                <div class="funnel-bar" style="width: 210px;">相遇</div>
+                <div class="stage-name">简历收取</div>
+                <div class="stage-num">第一次相识</div>
+            </div>
+            <div class="funnel-arrow">❀</div>
+            <div class="funnel-stage">
+                <div class="funnel-bar" style="width: 185px;">相识</div>
+                <div class="stage-name">笔试测评</div>
+                <div class="stage-num">慢慢了解</div>
+            </div>
+            <div class="funnel-arrow">❀</div>
+            <div class="funnel-stage">
+                <div class="funnel-bar" style="width: 160px;">相知</div>
+                <div class="stage-name">初试·复试</div>
+                <div class="stage-num">深入交流</div>
+            </div>
+            <div class="funnel-arrow">❀</div>
+            <div class="funnel-stage stage-hired">
+                <div class="funnel-bar" style="width: 135px;">相许</div>
+                <div class="stage-name">录用·签约</div>
+                <div class="stage-num">双向奔赴</div>
+            </div>
+            <div class="funnel-arrow">❀</div>
+            <div class="funnel-stage">
+                <div class="funnel-bar" style="width: 110px;">同行</div>
+                <div class="stage-name">入职报到</div>
+                <div class="stage-num">携手同行</div>
+            </div>
+        </div>
     </div>
 
     <div class="home-grid">
