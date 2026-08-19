@@ -25,8 +25,8 @@ public interface WeeklyRecruitmentMapper extends BaseMapper<WeeklyRecruitment> {
      * @param positionName 职位名称(模糊)
      * @param channel      渠道
      * @param subChannel   子渠道
-     * @param startDate    开始日期
-     * @param endDate      结束日期
+     * @param startDate    创建时间范围-开始日期
+     * @param endDate      创建时间范围-结束日期
      * @return 每周数据列表
      */
     List<WeeklyRecruitment> selectWeeklyList(@Param("positionName") String positionName,

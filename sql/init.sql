@@ -47,13 +47,12 @@ CREATE TABLE `weekly_recruitment` (
     `weekly_onboarded`          INT          DEFAULT 0 COMMENT '当周报到数',
     `weekly_onboarded_names`    VARCHAR(500) DEFAULT NULL COMMENT '当周报到新人',
     `remark`                    VARCHAR(500) DEFAULT NULL COMMENT '备注',
-    `start_date`                DATE         DEFAULT NULL COMMENT '开始日期',
-    `end_date`                  DATE         DEFAULT NULL COMMENT '结束日期',
+    `create_date`               DATE         DEFAULT NULL COMMENT '创建时间',
     `create_time`               DATETIME     DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
     `update_time`               DATETIME     DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
     PRIMARY KEY (`id`),
     INDEX `idx_position_channel` (`position_name`, `channel`, `sub_channel`),
-    INDEX `idx_date` (`start_date`, `end_date`)
+    INDEX `idx_create_date` (`create_date`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='每周招聘数据表';
 
 -- ----------------------------

@@ -1,6 +1,6 @@
 /**
  * 每周招聘数据 JS
- * 按日期范围管理数据，默认开始/结束日期为当前日期
+ * 按创建时间管理数据，默认创建时间为当前日期
  */
 
 var positionList = [];
@@ -8,7 +8,7 @@ var positionList = [];
 // 页面加载完成后初始化
 document.addEventListener('DOMContentLoaded', function() {
     loadPositions();
-    // 日期默认当前日期
+    // 创建时间默认当前日期
     document.getElementById('filterStartDate').value = today();
     document.getElementById('filterEndDate').value = today();
     loadData();
@@ -57,7 +57,7 @@ function loadData() {
     if (positionName) params.append('positionName', positionName);
     if (channel) params.append('channel', channel);
     if (subChannel) params.append('subChannel', subChannel);
-    // 按日期范围筛选
+    // 按创建时间范围筛选
     if (startDate) params.append('startDate', startDate);
     if (endDate) params.append('endDate', endDate);
 
@@ -82,10 +82,6 @@ function renderTable(list) {
     var html = '';
     for (var i = 0; i < list.length; i++) {
         var item = list[i];
-        var dateRange = '';
-        if (item.startDate || item.endDate) {
-            dateRange = (item.startDate || '') + (item.endDate ? ' ~ ' + item.endDate : '');
-        }
         html += '<tr>' +
             '<td>' + (i + 1) + '</td>' +
             '<td>' + escapeHtml(item.positionName) + '</td>' +
@@ -108,7 +104,7 @@ function renderTable(list) {
             '<td>' + val(item.weeklyOnboarded) + '</td>' +
             '<td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;" title="' + escapeHtml(item.weeklyOnboardedNames || '') + '">' + escapeHtml(item.weeklyOnboardedNames || '') + '</td>' +
             '<td>' + escapeHtml(item.remark || '') + '</td>' +
-            '<td style="white-space:nowrap;">' + escapeHtml(dateRange) + '</td>' +
+            '<td style="white-space:nowrap;">' + escapeHtml(item.createDate || '') + '</td>' +
             '<td style="white-space:nowrap;">' +
                 '<button class="btn btn-warning btn-sm" onclick="openEditModal(' + item.id + ')">编辑</button> ' +
                 '<button class="btn btn-danger btn-sm" onclick="deleteWeekly(' + item.id + ')">删除</button>' +
@@ -137,9 +133,8 @@ function openAddModal() {
     document.getElementById('channel').value = '校招';
     document.getElementById('subChannel').value = '秋招';
     onChannelChange();
-    // 日期默认当前日期
-    document.getElementById('startDate').value = today();
-    document.getElementById('endDate').value = today();
+    // 创建时间默认当前日期
+    document.getElementById('createDate').value = today();
     document.getElementById('weeklyModal').classList.add('show');
 }
 
@@ -173,8 +168,7 @@ function openEditModal(id) {
                 document.getElementById('weeklyOnboarded').value = item.weeklyOnboarded || 0;
                 document.getElementById('weeklyOnboardedNames').value = item.weeklyOnboardedNames || '';
                 document.getElementById('remark').value = item.remark || '';
-                document.getElementById('startDate').value = item.startDate || '';
-                document.getElementById('endDate').value = item.endDate || '';
+                document.getElementById('createDate').value = item.createDate || '';
                 document.getElementById('weeklyModal').classList.add('show');
             }
         });
@@ -209,10 +203,9 @@ function saveWeekly() {
         showToast('请选择需求职位', 'error');
         return;
     }
-    var startDate = document.getElementById('startDate').value;
-    var endDate = document.getElementById('endDate').value;
-    if (!startDate || !endDate) {
-        showToast('请选择开始日期和结束日期', 'error');
+    var createDate = document.getElementById('createDate').value;
+    if (!createDate) {
+        showToast('请选择创建时间', 'error');
         return;
     }
     var data = {
@@ -236,8 +229,7 @@ function saveWeekly() {
         weeklyOnboarded: parseInt(document.getElementById('weeklyOnboarded').value) || 0,
         weeklyOnboardedNames: document.getElementById('weeklyOnboardedNames').value,
         remark: document.getElementById('remark').value,
-        startDate: startDate || null,
-        endDate: endDate || null
+        createDate: createDate || null
     };
     var id = document.getElementById('editId').value;
     var url = '/api/weekly/add';

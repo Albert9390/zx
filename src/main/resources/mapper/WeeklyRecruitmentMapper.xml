@@ -71,13 +71,13 @@
                 AND sub_channel = #{subChannel}
             </if>
             <if test="startDate != null and startDate != ''">
-                AND start_date &gt;= #{startDate}
+                AND create_date &gt;= #{startDate}
             </if>
             <if test="endDate != null and endDate != ''">
-                AND end_date &lt;= #{endDate}
+                AND create_date &lt;= #{endDate}
             </if>
         </where>
-        ORDER BY start_date DESC, id DESC
+        ORDER BY create_date DESC, id DESC
     </select>
 
 </mapper>

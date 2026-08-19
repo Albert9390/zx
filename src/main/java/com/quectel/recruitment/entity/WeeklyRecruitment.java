@@ -78,11 +78,8 @@ public class WeeklyRecruitment {
     /** 备注 */
     private String remark;
 
-    /** 开始日期 */
-    private LocalDate startDate;
-
-    /** 结束日期 */
-    private LocalDate endDate;
+    /** 创建时间(录入日期) */
+    private LocalDate createDate;
 
     private LocalDateTime createTime;
     private LocalDateTime updateTime;
