@@ -28,4 +28,14 @@ public class PageController {
     public String position() {
         return "position";
     }
+
+    @GetMapping("/page/user")
+    public String user() {
+        return "user";
+    }
+
+    @GetMapping("/login")
+    public String login() {
+        return "login";
+    }
 }

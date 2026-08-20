@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org">
+<html lang="zh-CN" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,11 +12,16 @@
 <nav class="navbar">
     <a class="navbar-brand" th:href="@{/}"><span class="brand-mark">招</span> 招聘报表管理系统</a>
     <ul class="navbar-nav">
-        <li><a th:href="@{/}">首页</a></li>
-        <li><a th:href="@{/page/position}" class="active">职位管理</a></li>
+        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/}">首页</a></li>
+        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/page/position}" class="active">职位管理</a></li>
         <li><a th:href="@{/page/weekly}">每周招聘</a></li>
         <li><a th:href="@{/page/total}">总报表</a></li>
+        <li sec:authorize="hasRole('ADMIN')"><a th:href="@{/page/user}">用户管理</a></li>
     </ul>
+    <div class="navbar-user">
+        <span class="user-name" sec:authentication="name"></span>
+        <a class="logout-link" th:href="@{/logout}">退出</a>
+    </div>
 </nav>
 
 <div class="container-fluid">
