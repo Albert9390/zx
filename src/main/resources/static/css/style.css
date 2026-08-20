@@ -14,6 +14,12 @@
     --primary-light: #f7eff1;
     --primary-border: #ecdde1;
 
+    /* 签名色 —— 深浆果红（「雾里一点深」，仅少量点缀） */
+    --signature-color: #7e3d4d;
+    --signature-dark: #66303e;
+    --signature-light: #f5ecef;
+    --signature-border: #e3d0d6;
+
     /* 强调色 —— 灰紫（少量点缀） */
     --accent-color: #9d90a8;
     --accent-hover: #877992;
@@ -34,7 +40,7 @@
     --bg-color: #f8f6f5;
     --card-bg: #ffffff;
     --surface-muted: #f3f0ee;
-    --text-color: #3a3536;
+    --text-color: #2e292a;
     --text-secondary: #6e6668;
     --text-muted: #a89fa2;
     --border-color: #e9e3e4;
@@ -110,9 +116,10 @@ body {
     justify-content: center;
     width: 30px;
     height: 30px;
-    background: var(--primary-color);
+    background: var(--signature-color);
     color: #fff;
-    border-radius: 8px;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px var(--signature-light);
     font-size: 15px;
     font-weight: 700;
     font-family: var(--font-display);
@@ -143,7 +150,7 @@ body {
 }
 
 .navbar-nav a.active {
-    color: var(--primary-dark);
+    color: var(--signature-dark);
     font-weight: 600;
 }
 
@@ -154,7 +161,7 @@ body {
     right: 16px;
     bottom: 0;
     height: 2px;
-    background: var(--primary-color);
+    background: var(--signature-color);
     border-radius: 2px 2px 0 0;
 }
 
@@ -252,15 +259,32 @@ body {
     align-items: center;
     gap: 10px;
     letter-spacing: 0.3px;
+    position: relative;
+    padding-left: 16px;
 }
 
+/* 标题锚点 —— 签名「旅程线 + 节点」：细竖线 + 顶端节点 */
 .card-header h5::before {
     content: "";
-    display: inline-block;
-    width: 4px;
-    height: 15px;
-    background: var(--primary-color);
-    border-radius: 2px;
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: var(--signature-border);
+    border-radius: 1px;
+}
+
+.card-header h5::after {
+    content: "";
+    position: absolute;
+    left: -3px;
+    top: -2px;
+    width: 8px;
+    height: 8px;
+    background: var(--signature-color);
+    border-radius: 50%;
+    box-shadow: 0 0 0 3px var(--signature-light);
 }
 
 .card-body {
@@ -369,12 +393,15 @@ body {
 }
 
 .btn-danger {
-    background: var(--danger-color);
-    color: #fff;
+    background: var(--card-bg);
+    color: var(--danger-color);
+    border-color: rgba(191, 125, 125, 0.5);
 }
 
 .btn-danger:hover {
-    background: #ab6b6b;
+    background: var(--danger-light);
+    border-color: var(--danger-color);
+    color: var(--danger-color);
 }
 
 .btn-warning {
@@ -439,7 +466,7 @@ table.data-table {
 
 table.data-table thead th {
     background: var(--surface-muted);
-    color: var(--text-secondary);
+    color: var(--text-color);
     padding: 10px 12px;
     text-align: center;
     font-weight: 600;
@@ -454,6 +481,11 @@ table.data-table thead th {
 
 table.data-table thead th:last-child {
     border-right: none;
+}
+
+/* 表头锚点：顶部细强调线（签名色） */
+table.data-table thead tr:first-child th {
+    border-top: 2px solid var(--signature-color);
 }
 
 table.data-table tbody td {
@@ -479,14 +511,6 @@ table.data-table tbody tr:hover {
     background: var(--primary-light);
 }
 
-table.data-table tbody tr:nth-child(even) {
-    background: #fcfbfa;
-}
-
-table.data-table tbody tr:nth-child(even):hover {
-    background: var(--primary-light);
-}
-
 table.data-table tbody tr.position-group td,
 table.data-table .merged-cell {
     background: var(--surface-muted);
@@ -498,6 +522,7 @@ table.data-table .position-cell {
     color: var(--primary-dark);
     font-weight: 700;
     font-family: var(--font-display);
+    border-left: 3px solid var(--signature-color);
 }
 
 table.data-table .text-right {
@@ -658,6 +683,7 @@ table.data-table .text-danger {
     color: var(--primary-dark);
     font-weight: 700;
     font-family: var(--font-display);
+    border-left: 3px solid var(--signature-color);
 }
 
 .filter-tip {
@@ -925,10 +951,29 @@ table.data-table .text-danger {
     margin-top: 2px;
 }
 
+/* 漏斗连接 —— 签名「旅程线 + 节点」：细横线 + 末端节点 */
 .funnel-arrow {
-    color: var(--text-muted);
-    font-size: 16px;
-    margin: 0 10px;
+    position: relative;
+    align-self: flex-start;
+    width: 26px;
+    height: 2px;
+    margin: 21px 12px 0;
+    background: var(--signature-border);
+    border-radius: 1px;
+    flex-shrink: 0;
+}
+
+.funnel-arrow::after {
+    content: "";
+    position: absolute;
+    right: -1px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 7px;
+    height: 7px;
+    background: var(--signature-color);
+    border-radius: 50%;
+    box-shadow: 0 0 0 2px var(--signature-light);
 }
 
 /* 首页卡片网格 */
