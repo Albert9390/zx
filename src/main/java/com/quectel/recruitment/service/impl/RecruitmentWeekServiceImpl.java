@@ -99,6 +99,22 @@ public class RecruitmentWeekServiceImpl extends ServiceImpl<RecruitmentWeekMappe
     }
 
     @Override
+    public RecruitmentWeek withdrawWeek(Long id) {
+        RecruitmentWeek week = getById(id);
+        if (week == null) {
+            throw new IllegalArgumentException("该周数据不存在");
+        }
+        // 反操作校验：未提交（草稿）的周无需撤回
+        if (week.getStatus() == null || week.getStatus() != 1) {
+            throw new IllegalArgumentException("该周未提交，无需撤回");
+        }
+        // 状态回退：已提交 -> 未提交（草稿），恢复可编辑/删除，数据不再计入总报表
+        week.setStatus(0);
+        updateById(week);
+        return week;
+    }
+
+    @Override
     public void deleteWeek(Long id) {
         RecruitmentWeek week = getById(id);
         if (week == null) {

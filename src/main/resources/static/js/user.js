@@ -1,5 +1,6 @@
 /**
  * 用户管理 JS
+ * 依赖 common.js 中的 escapeHtml / showToast / formatTime（页面已先行引入）。
  */
 
 // 页面加载完成后初始化
@@ -26,37 +27,37 @@ function loadData() {
 
 // 渲染表格
 function renderTable(list) {
-    var tbody = document.getElementById('userTbody');
+    const tbody = document.getElementById('userTbody');
     if (!list || list.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" class="empty-state">暂无用户</td></tr>';
         return;
     }
-    var html = '';
-    for (var i = 0; i < list.length; i++) {
-        var u = list[i];
-        var roleHtml = (u.role === 'ADMIN')
+    let html = '';
+    for (let i = 0; i < list.length; i++) {
+        const u = list[i];
+        const roleHtml = (u.role === 'ADMIN')
             ? '<span class="badge badge-warning">管理员</span>'
             : '<span class="badge badge-info">普通用户</span>';
-        var statusHtml = (u.status === 1)
+        const statusHtml = (u.status === 1)
             ? '<span class="badge badge-success">启用</span>'
             : '<span class="badge" style="background:var(--danger-light);color:var(--danger-color);">禁用</span>';
-        var toggleBtn = (u.status === 1)
+        const toggleBtn = (u.status === 1)
             ? '<button class="btn btn-warning btn-sm" onclick="toggleStatus(' + u.id + ', 0)">禁用</button>'
             : '<button class="btn btn-success btn-sm" onclick="toggleStatus(' + u.id + ', 1)">启用</button>';
-        html += '<tr>' +
-            '<td>' + (i + 1) + '</td>' +
-            '<td>' + escapeHtml(u.username) + '</td>' +
-            '<td>' + escapeHtml(u.realName || '') + '</td>' +
-            '<td>' + roleHtml + '</td>' +
-            '<td>' + statusHtml + '</td>' +
-            '<td>' + escapeHtml(formatTime(u.createTime)) + '</td>' +
-            '<td style="white-space:nowrap;">' +
-                '<button class="btn btn-info btn-sm" onclick="openEditModal(' + u.id + ')">编辑</button> ' +
-                '<button class="btn btn-secondary btn-sm" onclick="openResetModal(' + u.id + ')">重置密码</button> ' +
-                toggleBtn + ' ' +
-                '<button class="btn btn-danger btn-sm" onclick="deleteUser(' + u.id + ', \'' + escapeHtml(u.username) + '\')">删除</button>' +
-            '</td>' +
-        '</tr>';
+        html += '<tr>'
+            + '<td>' + (i + 1) + '</td>'
+            + '<td>' + escapeHtml(u.username) + '</td>'
+            + '<td>' + escapeHtml(u.realName || '') + '</td>'
+            + '<td>' + roleHtml + '</td>'
+            + '<td>' + statusHtml + '</td>'
+            + '<td>' + escapeHtml(formatTime(u.createTime)) + '</td>'
+            + '<td style="white-space:nowrap;">'
+                + '<button class="btn btn-info btn-sm" onclick="openEditModal(' + u.id + ')">编辑</button> '
+                + '<button class="btn btn-secondary btn-sm" onclick="openResetModal(' + u.id + ')">重置密码</button> '
+                + toggleBtn + ' '
+                + '<button class="btn btn-danger btn-sm" onclick="deleteUser(' + u.id + ', \'' + escapeHtml(u.username) + '\')">删除</button>'
+            + '</td>'
+            + '</tr>';
     }
     tbody.innerHTML = html;
 }
@@ -78,10 +79,10 @@ function openEditModal(id) {
     fetch('/api/user/list')
         .then(res => res.json())
         .then(res => {
-            var list = res.data || [];
-            for (var i = 0; i < list.length; i++) {
+            const list = res.data || [];
+            for (let i = 0; i < list.length; i++) {
                 if (list[i].id === id) {
-                    var u = list[i];
+                    const u = list[i];
                     document.getElementById('modalTitle').textContent = '编辑用户';
                     document.getElementById('editId').value = u.id;
                     document.getElementById('username').value = u.username;
@@ -102,11 +103,11 @@ function closeModal() {
 
 // 保存用户（新增或编辑）
 function saveUser() {
-    var id = document.getElementById('editId').value;
-    var username = document.getElementById('username').value.trim();
-    var password = document.getElementById('password').value;
-    var realName = document.getElementById('realName').value.trim();
-    var role = document.getElementById('role').value;
+    const id = document.getElementById('editId').value;
+    const username = document.getElementById('username').value.trim();
+    const password = document.getElementById('password').value;
+    const realName = document.getElementById('realName').value.trim();
+    const role = document.getElementById('role').value;
 
     if (!username) {
         showToast('请输入用户名', 'error');
@@ -165,14 +166,15 @@ function openResetModal(id) {
     document.getElementById('resetModal').classList.add('show');
 }
 
+// 关闭重置密码模态框
 function closeResetModal() {
     document.getElementById('resetModal').classList.remove('show');
 }
 
 // 执行重置密码
 function doResetPassword() {
-    var id = document.getElementById('resetId').value;
-    var pwd = document.getElementById('resetPassword').value;
+    const id = document.getElementById('resetId').value;
+    const pwd = document.getElementById('resetPassword').value;
     if (!pwd) {
         showToast('请输入新密码', 'error');
         return;
@@ -195,7 +197,7 @@ function doResetPassword() {
 
 // 启用/禁用
 function toggleStatus(id, status) {
-    var tip = (status === 0) ? '确认禁用该用户吗？' : '确认启用该用户吗？';
+    const tip = (status === 0) ? '确认禁用该用户吗？' : '确认启用该用户吗？';
     if (!confirm(tip)) return;
     fetch('/api/user/' + id + '/status', {
         method: 'POST',
@@ -226,27 +228,4 @@ function deleteUser(id, name) {
                 showToast('删除失败: ' + res.message, 'error');
             }
         });
-}
-
-// ===== 工具函数 =====
-function formatTime(t) {
-    if (!t) return '';
-    return String(t).replace('T', ' ').substring(0, 16);
-}
-
-function escapeHtml(str) {
-    if (!str) return '';
-    return String(str).replace(/[&<>"']/g, function (s) {
-        return {'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[s];
-    });
-}
-
-function showToast(message, type) {
-    var toast = document.createElement('div');
-    toast.className = 'toast toast-' + (type || 'success');
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(function () {
-        toast.remove();
-    }, 3000);
 }

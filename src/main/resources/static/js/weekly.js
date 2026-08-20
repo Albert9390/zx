@@ -2,23 +2,24 @@
  * 每周招聘数据 JS
  * 采用"先添加周、再添加明细"的两步录入方式
  * 周 = 当前（或所选）日期所在周，周一为开始、周日为结束
+ * 依赖 common.js 中的 escapeHtml / showToast（页面已先行引入）。
  */
 
-var positionList = [];      // 所有需求职位
-var weekList = [];          // 所有招聘周
-var currentWeekInfo = null; // 当前所选日期的周信息
-var detailData = {};        // 明细缓存：positionName|channel|subChannel -> 记录对象（搜索重渲染不丢数据）
-var detailReadonly = false; // 明细弹框是否只读（已提交周查看时）
+let positionList = [];      // 所有需求职位
+let weekList = [];          // 所有招聘周
+let currentWeekInfo = null; // 当前所选日期的周信息
+let detailData = {};        // 明细缓存：positionName|channel|subChannel -> 记录对象（搜索重渲染不丢数据）
+let detailReadonly = false; // 明细弹框是否只读（已提交周查看时）
 
 // 每个职位下的渠道/子渠道行（与总报表排序一致：校招春招 → 校招秋招 → 社招）
-var CHANNEL_ROWS = [
+const CHANNEL_ROWS = [
     {channel: '校招', subChannel: '春招'},
     {channel: '校招', subChannel: '秋招'},
     {channel: '社招', subChannel: ''}
 ];
 
 // 明细弹框中可编辑字段（顺序与表头一致）
-var DETAIL_FIELDS = [
+const DETAIL_FIELDS = [
     {key: 'resumeReceived',        type: 'number'},
     {key: 'writtenExamScheduled',  type: 'number'},
     {key: 'writtenExamCompleted',  type: 'number'},
@@ -39,17 +40,17 @@ var DETAIL_FIELDS = [
 ];
 
 // 页面加载完成后初始化
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     loadPositions();
     loadWeeks();
 });
 
 // 获取当前日期字符串
 function today() {
-    var d = new Date();
-    var y = d.getFullYear();
-    var m = ('0' + (d.getMonth() + 1)).slice(-2);
-    var day = ('0' + d.getDate()).slice(-2);
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = ('0' + (d.getMonth() + 1)).slice(-2);
+    const day = ('0' + d.getDate()).slice(-2);
     return y + '-' + m + '-' + day;
 }
 
@@ -85,37 +86,33 @@ function loadWeeks() {
 
 // 渲染周列表
 function renderWeeks(list) {
-    var tbody = document.getElementById('weekTbody');
+    const tbody = document.getElementById('weekTbody');
     if (!list || list.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#999;">暂无周数据，点击右上角「新增每周数据」开始录入</td></tr>';
         return;
     }
-    var html = '';
-    for (var i = 0; i < list.length; i++) {
-        var w = list[i];
-        var submitted = (w.status === 1);
-        var statusHtml = submitted
+    let html = '';
+    for (let i = 0; i < list.length; i++) {
+        const w = list[i];
+        const submitted = (w.status === 1);
+        const statusHtml = submitted
             ? '<span class="badge badge-success">已提交</span>'
             : '<span class="badge badge-warning">未提交</span>';
-        var actionHtml;
-        if (submitted) {
-            actionHtml =
-                '<button class="btn btn-info btn-sm" onclick="viewWeekDetail(' + w.id + ')">查看明细</button>';
-        } else {
-            actionHtml =
-                '<button class="btn btn-warning btn-sm" onclick="editWeekDetail(' + w.id + ')">编辑明细</button> ' +
-                '<button class="btn btn-success btn-sm" onclick="submitWeek(' + w.id + ')">提交</button> ' +
-                '<button class="btn btn-danger btn-sm" onclick="deleteWeek(' + w.id + ')">删除</button>';
-        }
-        html += '<tr>' +
-            '<td>' + (i + 1) + '</td>' +
-            '<td style="font-weight:600;">' + escapeHtml(weekTitle(w)) + '</td>' +
-            '<td>' + escapeHtml(w.startDate || '') + '</td>' +
-            '<td>' + escapeHtml(w.endDate || '') + '</td>' +
-            '<td>' + (w.recordCount || 0) + '</td>' +
-            '<td>' + statusHtml + '</td>' +
-            '<td style="white-space:nowrap;">' + actionHtml + '</td>' +
-        '</tr>';
+        const actionHtml = submitted
+            ? '<button class="btn btn-info btn-sm" onclick="viewWeekDetail(' + w.id + ')">查看明细</button> '
+                + '<button class="btn btn-warning btn-sm" onclick="withdrawWeek(' + w.id + ')">撤回</button>'
+            : '<button class="btn btn-warning btn-sm" onclick="editWeekDetail(' + w.id + ')">编辑明细</button> '
+                + '<button class="btn btn-success btn-sm" onclick="submitWeek(' + w.id + ')">提交</button> '
+                + '<button class="btn btn-danger btn-sm" onclick="deleteWeek(' + w.id + ')">删除</button>';
+        html += '<tr>'
+            + '<td>' + (i + 1) + '</td>'
+            + '<td style="font-weight:600;">' + escapeHtml(weekTitle(w)) + '</td>'
+            + '<td>' + escapeHtml(w.startDate || '') + '</td>'
+            + '<td>' + escapeHtml(w.endDate || '') + '</td>'
+            + '<td>' + (w.recordCount || 0) + '</td>'
+            + '<td>' + statusHtml + '</td>'
+            + '<td style="white-space:nowrap;">' + actionHtml + '</td>'
+            + '</tr>';
     }
     tbody.innerHTML = html;
 }
@@ -135,6 +132,21 @@ function submitWeek(id) {
         });
 }
 
+// 撤回已提交的周（提交的反操作：解除锁定，恢复为草稿，可重新编辑/删除）
+function withdrawWeek(id) {
+    if (!confirm('撤回后该周数据将从总报表移除，并恢复为可编辑状态。确认撤回吗？')) return;
+    fetch('/api/week/' + id + '/withdraw', {method: 'POST'})
+        .then(res => res.json())
+        .then(res => {
+            if (res.code === 200) {
+                showToast('撤回成功', 'success');
+                loadWeeks();
+            } else {
+                showToast('撤回失败: ' + res.message, 'error');
+            }
+        });
+}
+
 // ===== 第一步：新增招聘周 =====
 function openWeekModal() {
     document.getElementById('weekPickerDate').value = today();
@@ -143,7 +155,7 @@ function openWeekModal() {
 }
 
 function onWeekDateChange() {
-    var d = document.getElementById('weekPickerDate').value;
+    const d = document.getElementById('weekPickerDate').value;
     if (d) fetchWeekInfo(d);
 }
 
@@ -200,9 +212,9 @@ function openDetailModal(week, existingRecords, readonly) {
     document.getElementById('detailSearchSelect').disabled = detailReadonly;
 
     // 填充职位下拉选项
-    var select = document.getElementById('detailSearchSelect');
-    var opts = '<option value="">全部职位</option>';
-    for (var i = 0; i < positionList.length; i++) {
+    const select = document.getElementById('detailSearchSelect');
+    let opts = '<option value="">全部职位</option>';
+    for (let i = 0; i < positionList.length; i++) {
         opts += '<option value="' + escapeHtml(positionList[i].positionName) + '">'
             + escapeHtml(positionList[i].positionName) + '</option>';
     }
@@ -211,7 +223,7 @@ function openDetailModal(week, existingRecords, readonly) {
 
     // 构建已有记录查找表：职位|渠道|子渠道 -> 记录
     detailData = {};
-    (existingRecords || []).forEach(function(r) {
+    (existingRecords || []).forEach(function (r) {
         detailData[r.positionName + '|' + r.channel + '|' + (r.subChannel || '')] = r;
     });
 
@@ -221,15 +233,15 @@ function openDetailModal(week, existingRecords, readonly) {
 
 // 收集当前表格中已填写的输入值到 detailData（搜索重渲染前调用，避免数据丢失）
 function collectDetailData() {
-    var rows = document.querySelectorAll('#detailTbody .detail-row');
-    rows.forEach(function(row) {
-        var rec = {
+    const rows = document.querySelectorAll('#detailTbody .detail-row');
+    rows.forEach(function (row) {
+        const rec = {
             positionName: row.getAttribute('data-position'),
             channel: row.getAttribute('data-channel'),
             subChannel: row.getAttribute('data-subchannel') || null
         };
-        row.querySelectorAll('.detail-input').forEach(function(input) {
-            var field = input.getAttribute('data-field');
+        row.querySelectorAll('.detail-input').forEach(function (input) {
+            const field = input.getAttribute('data-field');
             if (input.type === 'number') {
                 rec[field] = parseInt(input.value) || 0;
             } else {
@@ -242,21 +254,21 @@ function collectDetailData() {
 
 // 职位搜索（下拉选择）
 function onDetailSearch() {
-    var kw = document.getElementById('detailSearchSelect').value;
+    const kw = document.getElementById('detailSearchSelect').value;
     collectDetailData();
     renderDetailTable(kw);
 }
 
 // 渲染明细表格（需求职位列合并 3 行、渠道列合并校招 2 行）
 function renderDetailTable(keyword) {
-    var kw = (keyword || '').trim();
-    var filtered = positionList.filter(function(p) {
+    const kw = (keyword || '').trim();
+    const filtered = positionList.filter(function (p) {
         if (!kw) return true;
         return p.positionName === kw;
     });
 
-    var tbody = document.getElementById('detailTbody');
-    var tip = document.getElementById('detailSearchTip');
+    const tbody = document.getElementById('detailTbody');
+    const tip = document.getElementById('detailSearchTip');
     if (tip) {
         tip.textContent = kw ? ('共 ' + filtered.length + ' 个匹配职位') : '';
     }
@@ -266,15 +278,15 @@ function renderDetailTable(keyword) {
         return;
     }
 
-    var html = '';
-    var seq = 0;
-    for (var i = 0; i < filtered.length; i++) {
-        var p = filtered[i];
+    let html = '';
+    let seq = 0;
+    for (let i = 0; i < filtered.length; i++) {
+        const p = filtered[i];
         seq++;
-        for (var j = 0; j < CHANNEL_ROWS.length; j++) {
-            var cr = CHANNEL_ROWS[j];
-            var key = p.positionName + '|' + cr.channel + '|' + cr.subChannel;
-            var rec = detailData[key];
+        for (let j = 0; j < CHANNEL_ROWS.length; j++) {
+            const cr = CHANNEL_ROWS[j];
+            const key = p.positionName + '|' + cr.channel + '|' + cr.subChannel;
+            const rec = detailData[key];
 
             html += '<tr class="detail-row"'
                 + ' data-position="' + escapeHtml(p.positionName) + '"'
@@ -298,12 +310,12 @@ function renderDetailTable(keyword) {
             // 子渠道列
             html += '<td>' + escapeHtml(cr.subChannel) + '</td>';
 
-            for (var k = 0; k < DETAIL_FIELDS.length; k++) {
-                var f = DETAIL_FIELDS[k];
-                var v = rec ? rec[f.key] : null;
-                var disabledAttr = detailReadonly ? ' disabled' : '';
+            for (let k = 0; k < DETAIL_FIELDS.length; k++) {
+                const f = DETAIL_FIELDS[k];
+                const v = rec ? rec[f.key] : null;
+                const disabledAttr = detailReadonly ? ' disabled' : '';
                 if (f.type === 'number') {
-                    var numVal = (v === null || v === undefined || v === 0) ? '' : v;
+                    const numVal = (v === null || v === undefined || v === 0) ? '' : v;
                     html += '<td><input type="number" class="detail-input' + (detailReadonly ? ' detail-input-readonly' : '') + '" data-field="' + f.key + '" value="' + numVal + '" min="0"' + disabledAttr + '></td>';
                 } else {
                     html += '<td><input type="text" class="detail-input text-input' + (detailReadonly ? ' detail-input-readonly' : '') + '" data-field="' + f.key + '" value="' + escapeHtml(v || '') + '"' + disabledAttr + '></td>';
@@ -321,7 +333,7 @@ function closeDetailModal() {
 
 // 保存明细：收集填写了数据的行，批量提交
 function saveDetail() {
-    var weekId = document.getElementById('detailWeekId').value;
+    const weekId = document.getElementById('detailWeekId').value;
     if (!weekId) {
         showToast('缺少周信息', 'error');
         return;
@@ -329,14 +341,14 @@ function saveDetail() {
     // 先收集当前输入，避免搜索过滤后未显示行的数据丢失
     collectDetailData();
 
-    var list = [];
-    for (var key in detailData) {
+    const list = [];
+    for (const key in detailData) {
         if (!detailData.hasOwnProperty(key)) continue;
-        var rec = detailData[key];
-        var hasValue = false;
-        for (var k = 0; k < DETAIL_FIELDS.length; k++) {
-            var f = DETAIL_FIELDS[k];
-            var v = rec[f.key];
+        const rec = detailData[key];
+        let hasValue = false;
+        for (let k = 0; k < DETAIL_FIELDS.length; k++) {
+            const f = DETAIL_FIELDS[k];
+            const v = rec[f.key];
             if (f.type === 'number') {
                 if (v !== null && v !== undefined && v !== 0) hasValue = true;
             } else {
@@ -368,9 +380,9 @@ function editWeekDetail(id) {
     fetch('/api/weekly/list?weekId=' + id)
         .then(res => res.json())
         .then(res => {
-            var records = (res.code === 200) ? (res.data || []) : [];
-            var week = null;
-            for (var i = 0; i < weekList.length; i++) {
+            const records = (res.code === 200) ? (res.data || []) : [];
+            let week = null;
+            for (let i = 0; i < weekList.length; i++) {
                 if (weekList[i].id === id) {
                     week = weekList[i];
                     break;
@@ -389,9 +401,9 @@ function viewWeekDetail(id) {
     fetch('/api/weekly/list?weekId=' + id)
         .then(res => res.json())
         .then(res => {
-            var records = (res.code === 200) ? (res.data || []) : [];
-            var week = null;
-            for (var i = 0; i < weekList.length; i++) {
+            const records = (res.code === 200) ? (res.data || []) : [];
+            let week = null;
+            for (let i = 0; i < weekList.length; i++) {
                 if (weekList[i].id === id) {
                     week = weekList[i];
                     break;
@@ -418,22 +430,4 @@ function deleteWeek(id) {
                 showToast('删除失败: ' + res.message, 'error');
             }
         });
-}
-
-// ===== 工具函数 =====
-function escapeHtml(str) {
-    if (!str) return '';
-    return String(str).replace(/[&<>"']/g, function(s) {
-        return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s];
-    });
-}
-
-function showToast(message, type) {
-    var toast = document.createElement('div');
-    toast.className = 'toast toast-' + (type || 'success');
-    toast.textContent = message;
-    document.body.appendChild(toast);
-    setTimeout(function() {
-        toast.remove();
-    }, 3000);
 }

@@ -48,6 +48,12 @@ public class RecruitmentWeekController {
         return Result.success(recruitmentWeekService.submitWeek(id));
     }
 
+    /** 撤回已提交的招聘周（提交的反操作：解除锁定，恢复为草稿） */
+    @PostMapping("/{id}/withdraw")
+    public Result<RecruitmentWeek> withdraw(@PathVariable Long id) {
+        return Result.success(recruitmentWeekService.withdrawWeek(id));
+    }
+
     /** 删除招聘周（连同其明细，已提交的周不可删除） */
     @DeleteMapping("/{id}")
     public Result<Void> delete(@PathVariable Long id) {

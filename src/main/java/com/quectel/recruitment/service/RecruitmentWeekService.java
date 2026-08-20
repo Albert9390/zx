@@ -41,6 +41,14 @@ public interface RecruitmentWeekService extends IService<RecruitmentWeek> {
     RecruitmentWeek submitWeek(Long id);
 
     /**
+     * 撤回已提交的招聘周（提交的反操作：解除锁定，恢复为草稿，数据不再计入总报表）
+     *
+     * @param id 周ID
+     * @return 撤回后的周
+     */
+    RecruitmentWeek withdrawWeek(Long id);
+
+    /**
      * 删除招聘周（同时删除该周下的每周招聘明细）
      * 已提交的周不可删除
      *

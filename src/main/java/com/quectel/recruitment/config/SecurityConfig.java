@@ -2,7 +2,6 @@ package com.quectel.recruitment.config;
 
 import com.quectel.recruitment.entity.SysUser;
 import com.quectel.recruitment.service.SysUserService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -31,9 +30,6 @@ import org.springframework.security.web.SecurityFilterChain;
 @EnableWebSecurity
 public class SecurityConfig {
 
-    @Autowired
-    private SysUserService sysUserService;
-
     /**
      * 密码加密器：BCrypt（盐值自动生成，校验时自动比对）
      *
@@ -46,11 +42,15 @@ public class SecurityConfig {
 
     /**
      * 用户详情加载器：按用户名查询 sys_user，映射角色与启用状态
+     * <p>
+     * 通过方法参数注入 SysUserService（而非类字段注入），
+     * 避免与 SysUserServiceImpl（其依赖本类的 passwordEncoder Bean）形成循环依赖。
      *
+     * @param sysUserService 系统用户 Service（Spring 自动注入）
      * @return Spring Security 用户详情服务
      */
     @Bean
-    public UserDetailsService userDetailsService() {
+    public UserDetailsService userDetailsService(SysUserService sysUserService) {
         return username -> {
             SysUser user = sysUserService.findByUsername(username);
             if (user == null) {
